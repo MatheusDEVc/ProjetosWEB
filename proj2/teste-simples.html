@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Simples - GlowUp Store</title>
+    <style>
+        body {
+            background: #0f0f1e;
+            color: #e4e4e7;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .box {
+            background: #1a1a2e;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #06b6d4;
+            border-radius: 5px;
+        }
+        .ok { border-color: #10b981; }
+        .error { border-color: #ef4444; }
+        h2 { color: #06b6d4; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Simples GlowUp Store</h1>
+    
+    <div class="box">
+        <h2>1. Teste PRODUCTS</h2>
+        <p id="test1">Testando...</p>
+    </div>
+    
+    <div class="box">
+        <h2>2. Teste Featured Products</h2>
+        <p id="test2">Testando...</p>
+    </div>
+    
+    <div class="box">
+        <h2>3. Teste Categorias</h2>
+        <p id="test3">Testando...</p>
+    </div>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="scroll-animations.js"></script>
+    <script>
+        // Teste 1
+        if (typeof PRODUCTS !== 'undefined' && PRODUCTS.length > 0) {
+            document.getElementById('test1').innerHTML = '✅ PRODUCTS: ' + PRODUCTS.length + ' produtos';
+            document.getElementById('test1').parentElement.classList.add('ok');
+        } else {
+            document.getElementById('test1').innerHTML = '❌ PRODUCTS não está definido ou vazio';
+            document.getElementById('test1').parentElement.classList.add('error');
+        }
+
+        // Teste 2
+        if (typeof getCart === 'function') {
+            const cart = getCart();
+            document.getElementById('test2').innerHTML = '✅ getCart funciona. Carrinho: ' + cart.length + ' itens';
+            document.getElementById('test2').parentElement.classList.add('ok');
+        } else {
+            document.getElementById('test2').innerHTML = '❌ getCart não está definida';
+            document.getElementById('test2').parentElement.classList.add('error');
+        }
+
+        // Teste 3
+        if (typeof ScrollAnimations !== 'undefined') {
+            document.getElementById('test3').innerHTML = '✅ ScrollAnimations carregado';
+            document.getElementById('test3').parentElement.classList.add('ok');
+        } else {
+            document.getElementById('test3').innerHTML = '⚠️ ScrollAnimations não carregado';
+            document.getElementById('test3').parentElement.classList.add('error');
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

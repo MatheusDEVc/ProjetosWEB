@@ -1,0 +1,151 @@
+🔍 GUIA DE DEBUG - HOME PAGE (INDEX.HTML)
+
+PROBLEMA RELATADO:
+- ❌ Categorias não clicáveis
+- ❌ Produtos em destaque não aparecem
+
+PASSO 1: Abra o Browser Console
+═════════════════════════════════════════════
+1. Abra a página: index.html
+2. Pressione: F12 (ou Ctrl+Shift+I no Windows)
+3. Vá para a aba: "Console"
+4. Você verá logs como:
+
+✅ DOM Content Loaded
+📦 PRODUCTS definido: true
+🎯 Featured products container encontrado: true
+
+PASSO 2: Procure por erros
+═════════════════════════════════════════════
+Procure por mensagens em VERMELHO. Exemplos:
+- Uncaught SyntaxError
+- Cannot read property
+- 404 Not Found
+
+Se vir erros, anote exatamente o que diz.
+
+PASSO 3: Verifique os logs importantes
+═════════════════════════════════════════════
+
+DEVE MOSTRAR:
+✅ DOM Content Loaded
+✅ 📦 PRODUCTS definido: true
+✅ 🎯 Featured products container encontrado: true
+✅ 📥 Carregando 6 produtos em destaque...
+✅ Produtos em destaque carregados!
+✅ 🏷️ Encontradas 6 categorias
+✅ Event listeners de categorias configurados
+✅ 🛒 Contador do carrinho atualizado: 0
+✅ app.js carregado e pronto
+
+PASSO 4: Teste as categorias
+═════════════════════════════════════════════
+1. Volte para a página
+2. Clique em uma categoria (ex: "Skincare")
+3. Veja o console - deve mostrar:
+   🖱️ Clicou em categoria: Skincare
+   🔄 Navegando para categoria: Skincare
+   🎯 Destino: {page: 'feminino.html', filter: 'Skincare'}
+   📝 Categoria guardada em sessionStorage
+
+Se vê isso, significa que CLICOU CORRETAMENTE!
+
+PASSO 5: Se não funcionar
+═════════════════════════════════════════════
+
+Se VER erros vermelhos:
+- Anote EXATAMENTE qual é o erro
+- Procure pela palavra "undefined" ou "not found"
+- Verifique se os arquivos estão no mesmo diretório:
+  - products.js
+  - app.js
+  - cart.js
+  - scroll-animations.js
+
+Arquivos necessários:
+  ✅ index.html
+  ✅ products.js (deve ter "const PRODUCTS = [")
+  ✅ app.js
+  ✅ cart.js
+  ✅ scroll-animations.js
+  ✅ style.css
+  ✅ responsive.css
+  ✅ dark-theme-cyan.css
+
+TESTE NO CONSOLE:
+═════════════════════════════════════════════
+Cole isso no console e aperte Enter:
+
+console.log('PRODUCTS:', typeof PRODUCTS !== 'undefined' ? PRODUCTS.length + ' produtos' : 'NÃO DEFINIDO');
+console.log('Featured container:', document.getElementById('featured-products') ? 'ENCONTRADO' : 'NÃO ENCONTRADO');
+console.log('Categorias:', document.querySelectorAll('.category-card').length);
+
+RESULTADO ESPERADO:
+PRODUCTS: 32 produtos (ou similar)
+Featured container: ENCONTRADO
+Categorias: 6
+
+OPÇÃO NUCLEAR: Reset Cache
+═════════════════════════════════════════════
+Se nada funciona:
+1. Pressione Ctrl+Shift+Delete (limpar cache)
+2. Selecione "Cached images and files"
+3. Clique em "Clear data"
+4. F5 para recarregar
+
+ARQUIVOS CHECKLIST:
+═════════════════════════════════════════════
+Na pasta proj2, DEVE ter esses arquivos:
+
+index.html ..................... ✅
+masculino.html ................. ✅
+feminino.html .................. ✅
+produto.html ................... ✅
+carrinho.html .................. ✅
+checkout.html .................. ✅
+pedidos.html ................... ✅
+rastreamento.html .............. ✅
+admin.html ..................... ✅
+
+products.js .................... ✅
+app.js ......................... ✅
+cart.js ........................ ✅
+orders.js ...................... ✅
+checkout.js .................... ✅
+admin.js ....................... ✅
+scroll-animations.js ........... ✅
+
+style.css ...................... ✅
+responsive.css ................. ✅
+dark-theme-cyan.css ............ ✅
+
+LICENSE ........................ (opcional)
+README.md ...................... (opcional)
+
+Se falta algum arquivo, copie da pasta anterior.
+
+MAIS INFORMAÇÕES:
+═════════════════════════════════════════════
+Abra o DevTools (F12) → Elements
+Procure por:
+- <div id="featured-products" class="products-grid">
+  Deve ter 6 product-card dentro
+
+- <div class="categories-grid">
+  Deve ter 6 category-card dentro
+
+Se os elementos HTML estão vazios ou não existem,
+o problema é que os scripts não rodaram corretamente.
+
+CONTATO:
+═════════════════════════════════════════════
+Se o console mostrar erros específicos, me informe:
+1. O erro exato (a mensagem em vermelho)
+2. O arquivo que está faltando (se houver)
+3. Se você vê "404 Not Found" para algum arquivo
+
+Com isso, vou conseguir ajudar rapidinho!
+
+═════════════════════════════════════════════
+Desenvolvido para GlowUp Store
+Debug v1.0 - Abril 2026

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - GlowUp Store</title>
+    <style>
+        body {
+            background: #0f0f1e;
+            color: #e4e4e7;
+            font-family: monospace;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #27272a;
+        }
+        h1 {
+            color: #06b6d4;
+            margin-top: 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #06b6d4;
+        }
+        .ok {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: #10b981;
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: #ef4444;
+        }
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left-color: #f59e0b;
+        }
+        code {
+            background: #0f0f1e;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug GlowUp Store</h1>
+        
+        <div id="debug-output"></div>
+    </div>
+
+    <script>
+        const output = document.getElementById('debug-output');
+        
+        function log(message, type = 'status') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            output.appendChild(div);
+            console.log(message);
+        }
+
+        log('🔍 Iniciando debug...', 'status');
+        
+        // Teste 1: Verificar PRODUCTS
+        setTimeout(() => {
+            if (typeof PRODUCTS !== 'undefined') {
+                log(`✅ PRODUCTS carregado: ${PRODUCTS.length} produtos encontrados`, 'ok');
+            } else {
+                log('❌ PRODUCTS não definido - products.js não carregou', 'error');
+            }
+        }, 500);
+
+        // Teste 2: Verificar DOM elements
+        setTimeout(() => {
+            const featured = document.getElementById('featured-products');
+            if (featured) {
+                log(`✅ Featured products container encontrado`, 'ok');
+                log(`   Conteúdo: ${featured.innerHTML.length} caracteres`, 'status');
+            } else {
+                log('❌ Featured products container NÃO encontrado', 'error');
+            }
+        }, 500);
+
+        // Teste 3: Verificar categorias
+        setTimeout(() => {
+            const categories = document.querySelectorAll('.category-card');
+            if (categories.length > 0) {
+                log(`✅ ${categories.length} categorias encontradas`, 'ok');
+            } else {
+                log('❌ Nenhuma categoria encontrada', 'error');
+            }
+        }, 500);
+
+        // Teste 4: Verificar scroll-animations
+        setTimeout(() => {
+            if (typeof ScrollAnimations !== 'undefined') {
+                log('✅ ScrollAnimations carregado', 'ok');
+            } else {
+                log('⚠️ ScrollAnimations não disponível', 'warning');
+            }
+        }, 500);
+
+        // Teste 5: Verificar cart
+        setTimeout(() => {
+            const cart = localStorage.getItem('glowupCart');
+            log(`✅ LocalStorage glowupCart: ${cart ? 'definido' : 'vazio'}`, 'ok');
+        }, 500);
+
+        // Teste 6: Verificar scripts carregados
+        setTimeout(() => {
+            const scripts = document.querySelectorAll('script[src]');
+            log(`📋 ${scripts.length} scripts carregados:`, 'status');
+            scripts.forEach(s => {
+                const src = s.src.split('/').pop();
+                log(`   • ${src}`, 'status');
+            });
+        }, 500);
+
+        // Teste 7: Verificar CSS carregado
+        setTimeout(() => {
+            const links = document.querySelectorAll('link[rel="stylesheet"]');
+            log(`📋 ${links.length} CSS carregados:`, 'status');
+            links.forEach(l => {
+                const href = l.href.split('/').pop();
+                log(`   • ${href}`, 'status');
+            });
+        }, 500);
+
+        log('✅ Debug completo! Veja os resultados acima.', 'ok');
+    </script>
+
+    <!-- Scripts de teste - MESMA ORDEM DO INDEX.HTML -->
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="scroll-animations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

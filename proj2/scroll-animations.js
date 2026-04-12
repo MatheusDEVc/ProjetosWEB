@@ -28,6 +28,8 @@ class ScrollAnimations {
             });
         });
 
+        console.log('🎬 ScrollAnimations init: elementos encontrados:', this.elements.length);
+
         // Setup intersection observer
         this.setupIntersectionObserver();
 
@@ -72,17 +74,18 @@ class ScrollAnimations {
             }
         });
     }
+
+    // Método para re-observar elementos depois de carregados dinamicamente
+    observe() {
+        this.init();
+    }
 }
 
-// Iniciar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-    new ScrollAnimations();
+// NÃO inicializar automaticamente! Aguardar app.js
+// Isso permite que app.js carregue os produtos ANTES
+let scrollAnimationsInstance = null;
 
-    // Adicionar efeitos adicionais
-    setupParallaxEffect();
-    setupMouseFollowEffect();
-    setupScrollProgressBar();
-});
+// ATENÇÃO: app.js vai criar a instância após carregar os produtos
 
 // ===== PARALLAX EFFECT =====
 function setupParallaxEffect() {
@@ -127,10 +130,10 @@ function setupScrollProgressBar() {
             top: 0;
             left: 0;
             height: 3px;
-            background: linear-gradient(90deg, #d946a6, #ec4899);
+            background: linear-gradient(90deg, #06b6d4, #0891b2);
             z-index: 9999;
             transition: width 0.2s ease;
-            box-shadow: 0 0 20px rgba(217, 70, 166, 0.5);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
         `;
         document.body.appendChild(progressBar);
     }

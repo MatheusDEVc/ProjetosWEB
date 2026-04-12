@@ -29,15 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         featuredProducts.innerHTML = html;
         console.log('✅ Produtos em destaque carregados!');
-        
-        // Re-inicializar animações após carregar produtos
-        if (typeof ScrollAnimations !== 'undefined') {
-            console.log('🎬 Reinicializando ScrollAnimations...');
-            setTimeout(() => {
-                new ScrollAnimations();
-                console.log('✅ ScrollAnimations reinicializado');
-            }, 100);
-        }
     } else {
         console.warn('⚠️ Não foi possível carregar produtos. Featured:', !!featuredProducts, 'PRODUCTS:', typeof PRODUCTS);
     }
@@ -50,7 +41,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualizar contador do carrinho
     updateCartCount();
+
+    // INICIALIZAR ScrollAnimations DEPOIS de todo conteúdo carregar
+    setTimeout(() => {
+        console.log('🎬 Inicializando ScrollAnimations...');
+        setupScrollEffects();
+        console.log('✅ ScrollAnimations inicializado');
+    }, 100);
 });
+
+function setupScrollEffects() {
+    // Inicializar scroll animations para elementos estáticos E dinâmicos
+    new ScrollAnimations();
+    
+    // Adicionar efeitos adicionais
+    setupParallaxEffect();
+    setupMouseFollowEffect();
+    setupScrollProgressBar();
+}
 
 function setupCategoryClickHandlers() {
     const categoryCards = document.querySelectorAll('.category-card');
