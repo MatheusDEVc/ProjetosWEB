@@ -1,0 +1,301 @@
+🔒 AUDITORIA DE SEGURANÇA - GLOWUP STORE
+═════════════════════════════════════════════════════════════════════
+
+DATA: Abril 12, 2026
+CRITICIDADE: 🔴 CRÍTICA (Para Produção)
+
+═════════════════════════════════════════════════════════════════════
+
+BRECHAS ENCONTRADAS:
+════════════════════
+
+1. 🔴 CRÍTICA - PREÇOS EXPOSTOS NO CLIENT
+   ─────────────────────────────────────────
+   ARQUIVO: products.js
+   PROBLEMA:
+   └─ Todos os preços estão em JavaScript visível no navegador
+   └─ Cliente pode:
+      • Abrir DevTools (F12)
+      • Ver produtos.js
+      • Modificar preços em tempo real
+      • Pagar valor arbitrário
+
+   EXEMPLO DE ATAQUE:
+   ├─ Abra console: window.PRODUCTS[0].price = 0.01
+   ├─ Compre por R$ 0,01
+   ├─ Seu carrinho/pedido mostra R$ 0,01
+   ├─ Sistema inteiro quebrado!
+   
+   RISCO: ⚠️ PERDA TOTAL DE RECEITA
+
+2. 🔴 CRÍTICA - VALIDAÇÃO APENAS NO CLIENT
+   ─────────────────────────────────────────
+   ARQUIVO: checkout.js, cart.js
+   PROBLEMA:
+   └─ Validações só acontecem no JavaScript
+   └─ Cliente pode:
+      • Desabilitar JavaScript
+      • Modificar dados antes de enviar
+      • Manipular quantidade de produtos
+      • Adicionar itens sem pagar
+
+   EXEMPLO:
+   ├─ Desativa JS (F12 → disable JavaScript)
+   ├─ Ou abre console: 
+   │  const cart = [{id: 1, quantity: 1000}];
+   │  localStorage.setItem('glowupCart', JSON.stringify(cart));
+   ├─ Finaliza "compra" de 1000 unidades pelo preço de 1
+
+   RISCO: ⚠️ FRAUDE MASSIVA
+
+3. 🔴 CRÍTICA - DADOS SENSÍVEIS NO LOCALSTORAGE
+   ─────────────────────────────────────────────
+   ARQUIVO: cart.js, orders.js, checkout.js
+   PROBLEMA:
+   └─ localStorage é TEXTO PURO, não criptografado
+   └─ localStorage é acessível por QUALQUER JavaScript
+   └─ Se site é atacado por XSS, dados são roubados
+
+   DADOS EXPOSTOS:
+   ├─ glowupCart - todos os itens da compra
+   ├─ glowupOrders - histórico de pedidos completo
+   ├─ discount - cupons usados
+   ├─ Telefone, CPF, endereço armazenado?
+   
+   EXEMPLO DE XSS:
+   ├─ Anunciante injeta código malicioso
+   ├─ Código roda no navegador
+   ├─ Rouba: localStorage.getItem('glowupOrders')
+   ├─ Envia para servidor malicioso com dados da vítima
+
+   RISCO: ⚠️ ROUBO DE DADOS PESSOAIS
+
+4. 🔴 CRÍTICA - SEM AUTENTICAÇÃO/AUTORIZAÇÃO
+   ──────────────────────────────────────────
+   ARQUIVO: admin.html, admin.js
+   PROBLEMA:
+   └─ Admin panel é acessível por QUALQUER pessoa
+   └─ Basta ir para admin.html
+   └─ Ninguém pode mudar status de pedidos de outros
+
+   EXEMPLO:
+   ├─ Usuário A entra em glowupstore.com/admin.html
+   ├─ Vê TODOS os pedidos de TODOS os clientes
+   ├─ Pode mudar status de qualquer pedido
+   ├─ Rouba dados sensíveis de outros usuários
+
+   RISCO: ⚠️ ACESSO NÃO AUTORIZADO A DADOS PRIVADOS
+
+5. 🔴 CRÍTICA - SEM VALIDAÇÃO DE PREÇO NO PAGAMENTO
+   ──────────────────────────────────────────────────
+   ARQUIVO: checkout.js, orders.js
+   PROBLEMA:
+   └─ Preço mostrado != preço REAL no servidor
+   └─ Cliente paga R$ 10 via MercadoPago
+   └─ Mas seu carrinho mostra R$ 1000 internamente
+
+   FLUXO DO ATAQUE:
+   ├─ Insere produtos no carrinho
+   ├─ Vai para checkout
+   ├─ Abre console: modificar total = 0.01
+   ├─ Faz "pagamento" de R$ 0,01
+   ├─ Seu backend registra grande pedido
+   ├─ Perde produtos E dinheiro
+
+   RISCO: ⚠️ FRAUDE EM DOIS LUGARES
+
+6. 🟡 ALTA - SEM PROTEÇÃO CONTRA MANIPULAÇÃO DE IDS
+   ──────────────────────────────────────────────
+   ARQUIVO: produto.html, app.js
+   PROBLEMA:
+   └─ ID do produto vem de ?id=1 na URL
+   └─ Cliente pode mudar para ?id=999999
+   └─ Pode acessar produtos que não existem
+
+   EXEMPLO:
+   ├─ URL: produto.html?id=1 (mostra Sérum)
+   ├─ Muda para: produto.html?id=0 ou id=-1 ou id=99999
+   ├─ Pode ter comportamento inesperado
+   ├─ Pode descobrir quantos produtos existem
+
+   RISCO: ⚠️ ENUMERAÇÃO E POSSÍVEL DOS
+
+7. 🟡 ALTA - DESCONTO SEM VALIDAÇÃO
+   ───────────────────────────────
+   ARQUIVO: checkout.js
+   PROBLEMA:
+   └─ Desconto vem do sessionStorage
+   └─ Cliente pode:
+      • sessionStorage.setItem('discount', 99999)
+      • Fazer compra com desconto impossível
+
+   EXEMPLO:
+   ├─ Produto custa R$ 100
+   ├─ Console: sessionStorage.setItem('discount', 150);
+   ├─ Cliente recebe REEMBOLSO de R$ 50!
+
+   RISCO: ⚠️ FRAUDE DE DESCONTO
+
+8. 🟡 ALTA - SEM PROTEÇÃO CONTRA BOTS
+   ────────────────────────────────
+   ARQUIVO: checkout.js
+   PROBLEMA:
+   └─ Sem CAPTCHA ou verificação
+   └─ Bot pode:
+      • Fazer 1000 pedidos por segundo
+      • Derrubar servidor
+      • Consumir cupons
+      • Fazer força bruta em validações
+
+   RISCO: ⚠️ ATAQUE DE NEGAÇÃO DE SERVIÇO (DDoS)
+
+9. 🟠 MÉDIA - SEM HTTPS/SSL
+   ────────────────────
+   ARQUIVO: Todo site
+   PROBLEMA:
+   └─ Se site não estiver em HTTPS
+   └─ Dados trafegam em TEXTO PURO
+   └─ Man-in-the-middle pode:
+      • Ver endereço da vítima
+      • Ver número de CPF
+      • Roubar cookies/tokens
+      • Injetar código malicioso
+
+   RISCO: ⚠️ INTERCEPTAÇÃO DE DADOS
+
+10. 🟠 MÉDIA - SEM VALIDAÇÃO DE EMAIL
+    ────────────────────────────────
+    ARQUIVO: checkout.js
+    PROBLEMA:
+    └─ Email não é validado
+    └─ Pode usar emails fakes
+    └─ Difícil rastrear fraudes
+
+    RISCO: ⚠️ CRIAÇÃO DE CONTAS FANTASMAS
+
+11. 🟠 MÉDIA - DADOS ARMAZENADOS SEM ENCRIPTAÇÃO
+    ─────────────────────────────────────────
+    ARQUIVO: orders.js
+    PROBLEMA:
+    └─ Dados pessoais armazenados em localStorage
+    └─ Telefone, CPF, endereço em TEXTO PURO
+    └─ Se computador é roubado, dados são acessíveis
+    
+    RISCO: ⚠️ ROUBO DE IDENTIDADE
+
+12. 🟠 MÉDIA - DADOS NÃO SÃO VALIDADOS
+    ────────────────────────────────
+    ARQUIVO: checkout.js
+    PROBLEMA:
+    └─ CPF pode ser "12345678901" (fake)
+    └─ Telefone pode ser "9999999999"
+    └─ Endereço pode ser "rua da fraude"
+    └─ Sem validação real
+
+    RISCO: ⚠️ PEDIDOS COM DADOS INVÁLIDOS
+
+═════════════════════════════════════════════════════════════════════
+
+RESUMO DE RISCO:
+════════════════
+
+CRÍTICA:  5 brechas 🔴
+ALTA:     2 brechas 🟡
+MÉDIA:    5 brechas 🟠
+
+PONTUAÇÃO: 0/100 (NÃO SEGURO PARA PRODUÇÃO)
+
+═════════════════════════════════════════════════════════════════════
+
+PLANO DE CORREÇÃO:
+═══════════════════
+
+FASE 1 - CRÍTICA (Implementar ANTES de MercadoPago)
+───────────────────────────────────────────────────
+
+1. ✅ NÃO incluir preços em products.js (apenas IDs)
+   └─ Preços vêm de servidor/API
+
+2. ✅ VALIDAÇÃO DUPLA (Client + Server)
+   ├─ Client: UX rápida
+   └─ Server: Validação REAL
+
+3. ✅ HASH/ASSINATURA DE PEDIDO
+   ├─ Gera hash dos preços + IDs
+   ├─ Envia com pedido
+   ├─ Server valida hash
+
+4. ✅ AUTENTICAÇÃO/AUTORIZAÇÃO
+   ├─ Login de admin
+   ├─ Senhas hasheadas
+   ├─ Verificação de permissões
+
+5. ✅ NUNCA CONFIAR EM CLIENT
+   ├─ Sempre reverificar preços
+   ├─ Sempre verificar quantidades
+   ├─ Sempre verificar descontos
+
+FASE 2 - ALTA
+─────────────
+
+6. ✅ SANITIZE DE INPUTS
+   ├─ Remover caracteres inválidos
+   ├─ Prevenir SQL Injection
+   └─ Prevenir XSS
+
+7. ✅ RATE LIMITING
+   ├─ Máximo 5 pedidos/minuto por IP
+   ├─ Máximo 10 checkout attempts/hora
+   └─ Bloqueio temporário de IPs suspeitos
+
+FASE 3 - MÉDIA
+──────────────
+
+8. ✅ HTTPS OBRIGATÓRIO
+   └─ Apenas HTTPS, sem HTTP
+
+9. ✅ VALIDAÇÃO DE EMAIL
+   └─ Código de confirmação
+
+10. ✅ ENCRIPTAÇÃO DE DADOS
+    └─ localStorage com AES se necessário
+
+═════════════════════════════════════════════════════════════════════
+
+IMPLEMENTAÇÃO:
+═══════════════
+
+Será criado um arquivo README com as seguintes mudanças:
+
+1. security-server.js
+   └─ Backend simples para validações (Node.js)
+
+2. products-secure.js
+   └─ Apenas IDs dos produtos
+
+3. checkout-secure.js
+   └─ Validação completa no backend
+
+4. authentication.js
+   └─ Sistema de admin login
+
+5. data-validation.js
+   └─ Sanitização e validação
+
+6. SEGURANCA_IMPLEMENTACAO.txt
+   └─ Guia de implementação
+
+═════════════════════════════════════════════════════════════════════
+
+STATUS:
+════════
+
+❌ ATUAL: NÃO SEGURO
+⏳ OBJETIVO: SEGURO PARA PRODUÇÃO
+
+Tempo estimado de correção: 2-3 horas
+
+═════════════════════════════════════════════════════════════════════
+
+Desenvolvido para GlowUp Store
+Auditoria v1.0 - Abril 2026
