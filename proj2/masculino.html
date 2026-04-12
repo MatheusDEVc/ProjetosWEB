@@ -6,6 +6,7 @@
     <title>Produtos Masculinos - GlowUp Store</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="dark-theme-cyan.css">
 </head>
 <body>
     <!-- Header -->
@@ -88,6 +89,7 @@
         </div>
     </footer>
 
+    <script src="scroll-animations.js"></script>
     <script src="products.js"></script>
     <script src="cart.js"></script>
     <script src="app.js"></script>
@@ -116,19 +118,17 @@
                 filtered = filtered.filter(p => p.category === category);
             }
 
-            container.innerHTML = filtered.map(product => `
-                <div class="product-card">
+            container.innerHTML = filtered.map((product, index) => `
+                <div class="product-card scroll-fade-up" data-delay="${index * 100}">
                     <div class="product-image">
                         <img src="${product.image}" alt="${product.name}">
                     </div>
                     <div class="product-info">
-                        <h3>${product.name}</h3>
-                        <p class="category-badge">${product.category}</p>
-                        <p class="product-desc">${product.description.substring(0, 80)}...</p>
-                        <div class="product-footer">
-                            <span class="price">R$ ${product.price.toFixed(2)}</span>
-                            <a href="produto.html?id=${product.id}" class="btn btn-small">Ver Detalhes</a>
-                        </div>
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-category">${product.category}</p>
+                        <p class="product-description">${product.description.substring(0, 80)}...</p>
+                        <div class="product-price">R$ ${product.price.toFixed(2)}</div>
+                        <a href="produto.html?id=${product.id}" class="product-button">Ver Detalhes</a>
                     </div>
                 </div>
             `).join('');
