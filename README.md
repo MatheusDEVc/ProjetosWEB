@@ -1,2 +1,2 @@
-# Vibe Code
-alguns códigos criados com IA
+# Projetos WEB
+alguns projetos criados com ajuda de IA
