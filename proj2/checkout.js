@@ -78,14 +78,19 @@ function loadOrderSummary() {
 function handleCheckoutSubmit(e) {
     e.preventDefault();
 
-    // Validações básicas
-    if (!validateForm()) {
-        return;
-    }
+    try {
+        // Validações básicas
+        if (!validateForm()) {
+            return;
+        }
 
-    // Simular processamento de pagamento
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-    processPayment(paymentMethod);
+        // Simular processamento de pagamento
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        processPayment(paymentMethod);
+    } catch (error) {
+        console.error('Erro ao submeter checkout:', error);
+        alert('Erro ao processar o formulário. Tente novamente.');
+    }
 }
 
 function validateForm() {
@@ -121,13 +126,16 @@ function processPayment(method) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Processando pagamento...';
 
+    console.log('Iniciando processamento de pagamento:', method);
+
     // Simular processamento de 2 segundos
     setTimeout(() => {
-        // Simular sucesso (90% de chance)
-        if (Math.random() < 0.9) {
+        try {
+            console.log('Completando pedido após simulação...');
             completeOrder();
-        } else {
-            alert('Houve um erro no processamento. Tente novamente.');
+        } catch (error) {
+            console.error('Erro no processamento de pagamento:', error);
+            alert('Houve um erro no processamento. Tente novamente.\n\nDetalhes: ' + error.message);
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
@@ -135,52 +143,86 @@ function processPayment(method) {
 }
 
 function completeOrder() {
-    // Gerar número de pedido único
-    const orderNumber = 'GU' + Date.now().toString().slice(-8).toUpperCase();
-    const orderTotal = document.getElementById('summary-total').textContent;
-    
-    // Extrair valor numérico do total
-    const totalValue = parseFloat(orderTotal.replace('R$ ', '').replace(',', '.'));
+    try {
+        console.log('Iniciando completeOrder...');
+        
+        // Gerar número de pedido único
+        const orderNumber = 'GU' + Date.now().toString().slice(-8).toUpperCase();
+        const orderTotal = document.getElementById('summary-total').textContent;
+        
+        console.log('Número do pedido:', orderNumber);
+        console.log('Total do pedido:', orderTotal);
+        
+        // Extrair valor numérico do total
+        const totalValue = parseFloat(orderTotal.replace('R$ ', '').replace(',', '.'));
+        console.log('Valor total (número):', totalValue);
 
-    // Obter dados do carrinho
-    const cart = getCart();
+        // Obter dados do carrinho
+        const cart = getCart();
+        console.log('Carrinho:', cart);
 
-    // Obter dados do formulário
-    const customerData = {
-        fullName: document.getElementById('full-name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        cpf: document.getElementById('cpf').value,
-        address: document.getElementById('address').value,
-        number: document.getElementById('number').value,
-        complement: document.getElementById('complement').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        zip: document.getElementById('zip').value
-    };
+        // Obter dados do formulário
+        const customerData = {
+            fullName: document.getElementById('full-name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            cpf: document.getElementById('cpf').value,
+            address: document.getElementById('address').value,
+            number: document.getElementById('number').value || '',
+            complement: document.getElementById('complement').value || '',
+            city: document.getElementById('city').value || '',
+            state: document.getElementById('state').value || '',
+            zip: document.getElementById('zip').value || ''
+        };
+        console.log('Dados do cliente:', customerData);
 
-    // Obter método de pagamento
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        // Obter método de pagamento
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        console.log('Método de pagamento:', paymentMethod);
 
-    // Salvar pedido
-    saveOrder(orderNumber, cart, totalValue, customerData, paymentMethod);
+        // Salvar pedido
+        if (typeof saveOrder === 'function') {
+            console.log('Salvando pedido...');
+            saveOrder(orderNumber, cart, totalValue, customerData, paymentMethod);
+            console.log('Pedido salvo com sucesso!');
+        } else {
+            console.error('Função saveOrder não encontrada');
+            throw new Error('Sistema de pedidos indisponível');
+        }
 
-    // Limpar carrinho
-    localStorage.removeItem('glowupCart');
-    sessionStorage.removeItem('discount');
+        // Limpar carrinho
+        localStorage.removeItem('glowupCart');
+        sessionStorage.removeItem('discount');
+        console.log('Carrinho limpo');
 
-    // Mostrar mensagem de sucesso
-    document.querySelector('.checkout-container').style.display = 'none';
-    document.querySelector('.form-section:first-of-type').parentElement.style.display = 'none';
-    
-    const successMessage = document.getElementById('success-message');
-    successMessage.style.display = 'block';
+        // Mostrar mensagem de sucesso
+        const checkoutContainer = document.querySelector('.checkout-container');
+        if (checkoutContainer) {
+            checkoutContainer.style.display = 'none';
+            console.log('Container de checkout ocultado');
+        }
+        
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.style.display = 'block';
+            document.getElementById('order-number').textContent = orderNumber;
+            document.getElementById('order-total').textContent = orderTotal;
+            console.log('Mensagem de sucesso exibida');
+        }
 
-    document.getElementById('order-number').textContent = orderNumber;
-    document.getElementById('order-total').textContent = orderTotal;
+        // Scroll para o topo da página
+        window.scrollTo(0, 0);
+        console.log('Página rolada para o topo');
 
-    // Limpar sessão após 3 segundos para próxima compra
-    setTimeout(() => {
-        // Página fica exibindo a mensagem de sucesso
-    }, 3000);
+    } catch (error) {
+        console.error('Erro ao processar pedido:', error);
+        alert('Erro ao processar pedido. Por favor, tente novamente.\n\nDetalhes: ' + error.message);
+        
+        // Restaurar botão de submit
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirmar Pedido';
+        }
+    }
 }
