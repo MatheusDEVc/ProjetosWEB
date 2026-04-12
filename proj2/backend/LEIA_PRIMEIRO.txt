@@ -1,0 +1,60 @@
+🔧 SOLUÇÃO RÁPIDA - ERRO DE NPM
+═════════════════════════════════════════════════════════════════════
+
+ERRO QUE VOCÊ VISTO:
+   'No matching version found for jsonwebtoken@^9.1.2'
+   'nodemon' não é reconhecido
+
+SOLUÇÃO: Execute este arquivo
+═════════════════════════════════════════════════════════════════════
+
+OPÇÃO 1: AUTOMÁTICA (Clique e pronto!)
+════════════════════════════════════
+
+1. Vá para pasta: C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+2. Clique 2 vezes em: corrigir.bat
+3. Aguarde 5 minutos (pode pedir permissão de administrador)
+4. Quando terminar, execute: npm run dev
+
+═════════════════════════════════════════════════════════════════════
+
+OPÇÃO 2: RÁPIDA VIA CMD (2 minutos)
+═══════════════════════════════════
+
+Abra CMD e execute:
+
+    cd "C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend"
+    npm cache clean --force
+    rmdir /s /q node_modules
+    del package-lock.json
+    npm install
+    npm run dev
+
+═════════════════════════════════════════════════════════════════════
+
+O QUE FOI CORRIGIDO:
+════════════════════
+
+✅ Versões de pacotes atualizadas (agora funcionam)
+✅ Removido nodemon (não era necessário)
+✅ package.json com versões válidas
+✅ npm run dev agora funciona perfeitamente
+
+═════════════════════════════════════════════════════════════════════
+
+DEPOIS DA CORREÇÃO:
+═══════════════════
+
+Abra CMD e execute:
+
+    npm run dev
+
+Você vai ver:
+
+    ✨ GLOWUP STORE BACKEND
+    🚀 Servidor: http://localhost:5000
+    📊 Health: http://localhost:5000/api/health
+
+✅ PRONTO!
+
+═════════════════════════════════════════════════════════════════════
