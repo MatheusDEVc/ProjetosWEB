@@ -26,6 +26,7 @@ Bem-vindo à **GlowUp Store**, um e-commerce profissional e totalmente funcional
 ✅ Checkout profissional  
 ✅ Simulação de pagamento  
 ✅ **Sistema de Rastreamento de Pedidos** ⭐ NOVO!  
+✅ **Painel Administrativo** ⭐ NOVO!  
 ✅ Design responsivo (desktop, tablet, mobile)
 
 ## 📁 Estrutura de Arquivos
@@ -40,13 +41,17 @@ proj2/
 ├── checkout.html        # Checkout e pagamento
 ├── pedidos.html         # Meus pedidos e histórico ⭐ NOVO!
 ├── rastreamento.html    # Rastreamento detalhado ⭐ NOVO!
+├── admin.html           # Painel administrativo ⭐ NOVO!
 ├── style.css            # Estilos principais
 ├── responsive.css       # Design responsivo
 ├── products.js          # Base de dados de produtos
 ├── cart.js              # Gerenciamento do carrinho
 ├── orders.js            # Sistema de pedidos ⭐ NOVO!
+├── admin.js             # Lógica do painel admin ⭐ NOVO!
 ├── app.js               # Lógica principal
-└── checkout.js          # Lógica de checkout
+├── checkout.js          # Lógica de checkout
+├── ADMIN_GUIDE.md       # Guia de uso do painel admin
+└── ADMIN_RESUMO.txt     # Resumo rápido do painel admin
 ```
 
 ## 🚀 Como Usar
@@ -87,6 +92,16 @@ proj2/
 - Acompanhe o status em tempo real com timeline interativa
 - Visualize a data estimada de entrega
 - Veja detalhes de endereço e produtos
+
+### 6. **Painel Administrativo** ⭐ NOVO!
+- Abra **`admin.html`** para acessar o painel
+- **Gerencie todos os pedidos** em um só lugar
+- **Altere status manualmente** com um clique
+- **Visualize estatísticas** (total de pedidos, receita, entregues)
+- **Busque pedidos** por número ou email do cliente
+- **Filtre por status** e ordene como desejar
+- **Veja histórico completo** com data/hora de cada mudança
+- **Sincronização automática** a cada 10 segundos
 
 ## 💳 Métodos de Pagamento Disponíveis
 
@@ -130,6 +145,31 @@ Cada produto contém:
 - Produtos inclusos no pedido
 - Data estimada de entrega
 - Método de pagamento utilizado
+
+## 👨‍💼 Painel Administrativo ⭐ NOVO!
+
+### Como Acessar:
+- Abra **`admin.html`** no navegador
+- Ou acesse pelo link: `admin.html`
+
+### Funcionalidades:
+- 📊 **Dashboard de Estatísticas** - Total de pedidos, receita, entregues, pendentes
+- 🔍 **Busca Avançada** - Encontre pedidos por número ou email
+- 📋 **Filtros Inteligentes** - Por status, ordenação por data/valor
+- ✏️ **Alteração Manual de Status** - Um clique para mudar o status
+- 📜 **Histórico Completo** - Veja todas as mudanças com timestamp
+- 📱 **Design Responsivo** - Funciona em todos os dispositivos
+- 🔄 **Sincronização Automática** - Atualiza a cada 10 segundos
+
+### Status que Você Pode Definir:
+- ✅ Confirmado
+- ⚙️ Processando
+- 📦 Preparando
+- 🚚 Enviado
+- 🎉 Entregue
+- ❌ Cancelado
+
+**Leia [ADMIN_GUIDE.md](ADMIN_GUIDE.md) ou [ADMIN_RESUMO.txt](ADMIN_RESUMO.txt) para instruções detalhadas**
 
 ## 🔒 Armazenamento de Dados
 
