@@ -121,9 +121,19 @@
         </div>
     </footer>
 
-    <script src="scroll-animations.js"></script>
     <script src="products.js"></script>
     <script src="cart.js"></script>
+    <script src="scroll-animations.js"></script>
     <script src="app.js"></script>
+    <script>
+        window.addEventListener('load', function() {
+            console.log('🔍 DEBUG HOME PAGE:');
+            console.log('PRODUCTS disponível:', typeof PRODUCTS !== 'undefined');
+            console.log('Quantidade de produtos:', typeof PRODUCTS !== 'undefined' ? PRODUCTS.length : 0);
+            console.log('Featured products container:', document.getElementById('featured-products'));
+            console.log('Featured products innerHTML length:', document.getElementById('featured-products')?.innerHTML.length);
+            console.log('Category cards encontrados:', document.querySelectorAll('.category-card').length);
+        });
+    </script>
 </body>
 </html>
