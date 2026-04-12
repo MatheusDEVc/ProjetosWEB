@@ -1,0 +1,526 @@
+🚀 GUIA COMPLETO - BACKEND NODE.JS PARA GLOWUP STORE
+═════════════════════════════════════════════════════════════════════
+
+FASE 2: BACKEND SEGURO COM NODE.JS + EXPRESS + SQLITE
+───────────────────────────────────────────────────────
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 1: PREPARAR AMBIENTE
+═════════════════════════
+
+1.1 Instalar Node.js
+───────────────────
+  └─ Baixar em: https://nodejs.org/
+  └─ Recomendado: versão LTS (18.0+)
+  └─ Verificar: node --version && npm --version
+
+1.2 Criar pasta do backend
+──────────────────────────
+  Abra CMD/PowerShell e execute:
+  
+  cd "C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2"
+  mkdir backend
+  cd backend
+
+1.3 Estrutura de pastas
+──────────────────────
+  Criar a seguinte estrutura:
+
+  backend/
+  ├── package.json           ← npm dependencies
+  ├── .env                   ← configurações (NÃO commitar!)
+  ├── .env.example           ← template do .env
+  ├── server.js              ← servidor principal
+  ├── database.db            ← SQLite database (criado automaticamente)
+  │
+  ├── config/
+  │  └── database.js         ← configuração do banco
+  │
+  ├── middleware/
+  │  ├── auth.js             ← autenticação JWT
+  │  └── errorHandler.js     ← tratamento de erros
+  │
+  ├── routes/
+  │  ├── products.js         ← GET /api/products
+  │  ├── users.js            ← POST /api/auth/register, /login
+  │  ├── cart.js             ← POST /api/cart/add
+  │  ├── orders.js           ← POST /api/orders
+  │  └── admin.js            ← [admin] rutas protegidas
+  │
+  ├── controllers/
+  │  ├── productController.js
+  │  ├── userController.js
+  │  ├── cartController.js
+  │  ├── orderController.js
+  │  └── adminController.js
+  │
+  └── models/
+     ├── User.js
+     ├── Product.js
+     ├── Order.js
+     └── Cart.js
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 2: INICIALIZAR NPM E INSTALAR DEPENDÊNCIAS
+═════════════════════════════════════════════════
+
+2.1 Criar package.json
+──────────────────────
+  Copie o arquivo "backend-package.json" criado e renomeie para:
+  
+  mv backend-package.json backend/package.json
+  
+  Ou crie manualmente no backend/:
+  
+  npm init -y
+
+2.2 Instalar dependências
+─────────────────────────
+  cd backend/
+  npm install
+
+  Aguarde concluir. Vai instalar:
+  ✓ express - servidor web
+  ✓ cors - autorizar requisições cross-origin
+  ✓ dotenv - variáveis de ambiente
+  ✓ bcryptjs - hash de senhas
+  ✓ jsonwebtoken - tokens JWT
+  ✓ helmet - proteção HTTP headers
+  ✓ express-rate-limit - rate limiting
+  ✓ sqlite3 - banco de dados
+  ✓ morgan - logging de requisições
+  ✓ nodemon (dev) - auto-reload
+
+  Resultado esperado:
+  └─ node_modules/ (pasta com todas as dependências)
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 3: CRIAR ARQUIVOS DE CONFIGURAÇÃO
+════════════════════════════════════════
+
+3.1 Criar .env.example
+──────────────────────
+  Arquivo: backend/.env.example
+  (Já foi criado, inclua no repositório)
+
+3.2 Criar .env
+───────────────
+  Copie .env.example e renomeie para .env
+  
+  cp .env.example .env
+  
+  Conteúdo inicial:
+  ┌─────────────────────────────────┐
+  │ NODE_ENV=development            │
+  │ PORT=5000                        │
+  │ HOST=localhost                   │
+  │                                 │
+  │ DB_PATH=./database.db           │
+  │                                 │
+  │ JWT_SECRET=seu_secret_aqui      │
+  │ JWT_EXPIRE=7d                   │
+  │ BCRYPT_ROUNDS=10                │
+  │                                 │
+  │ CORS_ORIGIN=http://localhost... │
+  │                                 │
+  │ MERCADOPAGO_PUBLIC_KEY=...      │
+  │ MERCADOPAGO_ACCESS_TOKEN=...    │
+  └─────────────────────────────────┘
+
+  ⚠️ IMPORTANTE: .env deve estar em .gitignore!
+
+3.3 Criar .gitignore
+────────────────────
+  backend/.gitignore:
+  
+  node_modules/
+  .env
+  database.db
+  *.log
+  .DS_Store
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 4: CRIAR ESTRUTURA DE ARQUIVOS
+════════════════════════════════════
+
+4.1 Crie os seguintes arquivos (na ordem):
+──────────────────────────────────────────
+
+A) backend/config/database.js
+   └─ Configuração SQLite
+   └─ Criar tabelas automaticamente
+   └─ Seed de produtos iniciais
+
+B) backend/middleware/errorHandler.js
+   └─ Tratamento centralizado de erros
+
+C) backend/middleware/auth.js
+   └─ Autenticação JWT
+   └─ Autorização por role
+
+D) backend/server.js
+   └─ Servidor principal Express
+
+E) backend/routes/products.js
+   └─ GET /api/products
+   └─ GET /api/products/:id
+   └─ Validação de preços
+
+F) backend/routes/users.js
+   └─ POST /api/auth/register
+   └─ POST /api/auth/login
+   └─ POST /api/auth/refresh
+
+G) backend/routes/cart.js
+   └─ POST /api/cart/add
+   └─ GET /api/cart
+   └─ PUT /api/cart/update
+   └─ DELETE /api/cart/:id
+
+H) backend/routes/orders.js
+   └─ POST /api/orders (criar pedido)
+   └─ GET /api/orders (meus pedidos)
+   └─ GET /api/orders/:id (detalhes)
+
+I) backend/routes/admin.js
+   └─ GET /api/admin/orders (todos os pedidos)
+   └─ PUT /api/admin/orders/:id/status (mudar status)
+   └─ GET /api/admin/stats (estatísticas)
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 5: IMPLEMENTAÇÃO DETALHADA DOS ARQUIVOS
+═════════════════════════════════════════════
+
+(Veja arquivos separados criados no projeto)
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 6: TESTAR O SERVIDOR
+═════════════════════════
+
+6.1 Iniciar em modo desenvolvimento
+────────────────────────────────────
+  cd backend/
+  npm run dev
+  
+  Resultado esperado:
+  ┌─────────────────────────────────────┐
+  │ 🚀 Servidor rodando em:             │
+  │    http://localhost:5000            │
+  │                                     │
+  │ 📊 Health check:                    │
+  │    http://localhost:5000/api/health │
+  └─────────────────────────────────────┘
+
+6.2 Testar endpoints
+────────────────────
+  Usar Postman ou curl:
+  
+  GET http://localhost:5000/api/health
+  
+  Resposta esperada:
+  {
+    "status": "OK",
+    "timestamp": "2026-04-12T..."
+  }
+
+6.3 Verificar banco de dados
+────────────────────────────
+  Deve criar automaticamente:
+  └─ backend/database.db
+  └─ Tabelas: users, products, orders, etc
+  └─ Produtos: 32 inseridos automaticamente
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 7: CONECTAR FRONTEND AO BACKEND
+════════════════════════════════════
+
+7.1 Atualizar checkout.js no frontend
+──────────────────────────────────────
+  
+  ANTES:
+    function saveOrder(orderData) {
+        // Salvar em localStorage
+    }
+  
+  DEPOIS:
+    async function saveOrder(orderData) {
+        try {
+            const response = await fetch('http://localhost:5000/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('✅ Pedido salvo no servidor!');
+                // Limpar e redirecionar
+            } else {
+                console.error('❌ Erro:', result.message);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao salvar pedido:', error);
+        }
+    }
+
+7.2 Fluxo de autenticação
+─────────────────────────
+  
+  1. Cliente faz POST /api/auth/login
+     └─ Envia: email, password
+  
+  2. Backend retorna token JWT
+     └─ Token armazenado em localStorage
+  
+  3. Toda requisição usa Bearer token
+     └─ Header: Authorization: Bearer <token>
+  
+  4. Backend valida token em middleware
+     └─ Rejeita se expirado/inválido
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 8: DEPLOY E PRODUÇÃO
+═════════════════════════
+
+8.1 Preparar para produção
+──────────────────────────
+  
+  1. Atualizar .env para produção
+     └─ NODE_ENV=production
+     └─ JWT_SECRET=chave_super_segura_aqui (gerar com openssl)
+     └─ PORT=3000 ou 8080
+  
+  2. Usar HTTPS/SSL
+     └─ Certbot para Let's Encrypt (free)
+     └─ Ou certificado pago
+  
+  3. Usar process manager
+     └─ PM2 (npm install -g pm2)
+     └─ pm2 start server.js --name "glowup-backend"
+
+8.2 Hospedagem recomendada
+──────────────────────────
+  
+  ✓ Heroku (PaaS - fácil)
+  ✓ DigitalOcean (VPS - controle total)
+  ✓ AWS (EC2 - escalável)
+  ✓ Render (alternativa ao Heroku)
+  ✓ Railway.app (simples)
+
+═════════════════════════════════════════════════════════════════════
+
+ENDPOINTS DA API
+════════════════
+
+PRODUTOS
+────────
+GET    /api/products           → Lista todos (com paginação)
+GET    /api/products/:id       → Detalhes de um produto
+POST   /api/products/:id/price → Obter preço validado ⭐
+
+AUTENTICAÇÃO
+────────────
+POST   /api/auth/register      → Registrar usuário
+POST   /api/auth/login         → Fazer login (retorna token)
+POST   /api/auth/refresh       → Renovar token
+
+CARRINHO
+────────
+POST   /api/cart/add           → Adicionar ao carrinho
+GET    /api/cart               → Ver meu carrinho
+PUT    /api/cart/update        → Atualizar item
+DELETE /api/cart/:id           → Remover item
+
+PEDIDOS
+───────
+POST   /api/orders             → Criar pedido
+GET    /api/orders             → Listar meus pedidos
+GET    /api/orders/:id         → Detalhes do pedido
+
+ADMIN (protegido)
+─────────────────
+GET    /api/admin/orders       → Todos os pedidos
+PUT    /api/admin/orders/:id/status → Mudar status
+GET    /api/admin/stats        → Estatísticas
+
+═════════════════════════════════════════════════════════════════════
+
+EXEMPLO DE USO - FLUXO COMPLETO
+════════════════════════════════
+
+1. REGISTRAR USUÁRIO
+┌──────────────────────────────────────────────────────┐
+│ POST /api/auth/register                              │
+│                                                      │
+│ Body:                                                │
+│ {                                                    │
+│   "email": "cliente@email.com",                      │
+│   "password": "senha123",                            │
+│   "full_name": "João Silva",                         │
+│   "phone": "11987654321",                            │
+│   "cpf": "12345678900"                               │
+│ }                                                    │
+│                                                      │
+│ Response:                                            │
+│ {                                                    │
+│   "success": true,                                   │
+│   "token": "eyJhbGc...",                             │
+│   "user": { ... }                                    │
+│ }                                                    │
+└──────────────────────────────────────────────────────┘
+
+2. FAZER LOGIN
+┌──────────────────────────────────────────────────────┐
+│ POST /api/auth/login                                 │
+│                                                      │
+│ Body:                                                │
+│ {                                                    │
+│   "email": "cliente@email.com",                      │
+│   "password": "senha123"                             │
+│ }                                                    │
+│                                                      │
+│ Response:                                            │
+│ {                                                    │
+│   "success": true,                                   │
+│   "token": "eyJhbGc...",                             │
+│   "expiresIn": "7d"                                  │
+│ }                                                    │
+└──────────────────────────────────────────────────────┘
+
+3. OBTER PREÇO DE PRODUTO
+┌──────────────────────────────────────────────────────┐
+│ POST /api/products/1/price                           │
+│ Authorization: Bearer eyJhbGc...                      │
+│                                                      │
+│ Body:                                                │
+│ {                                                    │
+│   "quantity": 2                                      │
+│ }                                                    │
+│                                                      │
+│ Response:                                            │
+│ {                                                    │
+│   "success": true,                                   │
+│   "productId": 1,                                    │
+│   "unitPrice": 89.90,                                │
+│   "quantity": 2,                                     │
+│   "totalPrice": 179.80                               │
+│ }                                                    │
+└──────────────────────────────────────────────────────┘
+
+4. ADICIONAR AO CARRINHO
+┌──────────────────────────────────────────────────────┐
+│ POST /api/cart/add                                   │
+│ Authorization: Bearer eyJhbGc...                      │
+│                                                      │
+│ Body:                                                │
+│ {                                                    │
+│   "productId": 1,                                    │
+│   "quantity": 2                                      │
+│ }                                                    │
+│                                                      │
+│ Response:                                            │
+│ {                                                    │
+│   "success": true,                                   │
+│   "message": "Produto adicionado ao carrinho",       │
+│   "cartTotal": 3                                     │
+│ }                                                    │
+└──────────────────────────────────────────────────────┘
+
+5. CRIAR PEDIDO
+┌──────────────────────────────────────────────────────┐
+│ POST /api/orders                                     │
+│ Authorization: Bearer eyJhbGc...                      │
+│                                                      │
+│ Body:                                                │
+│ {                                                    │
+│   "items": [                                         │
+│     {"id": 1, "quantity": 2, "price": 89.90}        │
+│   ],                                                 │
+│   "subtotal": 179.80,                                │
+│   "shipping": 15.00,                                 │
+│   "discount": 0.00,                                  │
+│   "total": 194.80,                                   │
+│   "paymentMethod": "credit",                         │
+│   "shippingAddress": "Rua X, 123",                   │
+│   "orderHash": "abc123..."                           │
+│ }                                                    │
+│                                                      │
+│ Response:                                            │
+│ {                                                    │
+│   "success": true,                                   │
+│   "order": {                                         │
+│     "id": 1,                                         │
+│     "orderNumber": "GLW-2026-001",                   │
+│     "status": "confirmado",                          │
+│     "total": 194.80,                                 │
+│     "createdAt": "2026-04-12T..."                    │
+│   }                                                  │
+│ }                                                    │
+└──────────────────────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════
+
+SEGURANÇA IMPLEMENTADA
+══════════════════════
+
+✅ Senhas com bcrypt (não armazenar em texto puro)
+✅ JWT para autenticação
+✅ Rate limiting por IP
+✅ CORS restritivo
+✅ Helmet para proteção de headers
+✅ Validação de entrada em todas as rotas
+✅ Sanitização de dados
+✅ Logs de segurança
+✅ Hash de pedido para integridade
+✅ Preços validados no servidor
+✅ Verificação de permissões (role-based)
+
+═════════════════════════════════════════════════════════════════════
+
+PRÓXIMO PASSO: MERCADOPAGO
+═════════════════════════
+
+Depois que o backend estiver pronto:
+
+1. Criar conta MercadoPago
+2. Obter credenciais
+3. Integrar SDK
+4. Implementar webhook
+5. Testar transações
+
+═════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING
+═══════════════
+
+Erro: "Cannot find module 'express'"
+└─ Solução: npm install
+
+Erro: "EADDRINUSE: address already in use :::5000"
+└─ Solução: Mudar PORT em .env ou matar processo
+└─ netstat -ano | findstr :5000
+└─ taskkill /PID <PID> /F
+
+Erro: "SQLITE_CANTOPEN"
+└─ Solução: Verificar permissões da pasta
+
+Erro: "JWT expired"
+└─ Solução: Usar /api/auth/refresh para novo token
+
+═════════════════════════════════════════════════════════════════════
+
+Desenvolvido para GlowUp Store
+Backend v1.0 - Node.js + Express + SQLite
+Status: PRONTO PARA IMPLEMENTAÇÃO
