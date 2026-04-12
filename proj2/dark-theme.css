@@ -1,0 +1,755 @@
+/* ==========================================
+   DARK THEME - GlowUp Store
+   Tema escuro profissional com animações
+   ========================================== */
+
+:root {
+    /* ===== CORES - DARK THEME ===== */
+    --bg-primary: #0f0f1e;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --accent-primary: #d946a6;
+    --accent-secondary: #ec4899;
+    --accent-tertiary: #f472b6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border-color: #27272a;
+    --gradient-primary: linear-gradient(135deg, #d946a6, #ec4899);
+    --gradient-secondary: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+/* ===== ELEMENTOS BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+body {
+    background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #0f0f1e 100%);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background 0.3s ease;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 6px;
+    border: 2px solid var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));
+    box-shadow: 0 0 15px rgba(217, 70, 166, 0.5);
+}
+
+/* ===== ANIMAÇÕES DE SCROLL ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-60px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(60px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes rotateIn {
+    from {
+        opacity: 0;
+        transform: rotate(-10deg) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: rotate(0) scale(1);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(217, 70, 166, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(217, 70, 166, 0.6), 0 0 60px rgba(217, 70, 166, 0.3);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes borderGlow {
+    0%, 100% {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 10px rgba(217, 70, 166, 0.3) inset;
+    }
+    50% {
+        border-color: var(--accent-secondary);
+        box-shadow: 0 0 20px rgba(217, 70, 166, 0.6) inset;
+    }
+}
+
+@keyframes textGradient {
+    0%, 100% {
+        background-position: 0% center;
+    }
+    50% {
+        background-position: 100% center;
+    }
+}
+
+/* ===== CLASSES DE SCROLL ANIMATION ===== */
+.scroll-fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-fade-up.active {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInUp 0.8s ease;
+}
+
+.scroll-fade-down {
+    opacity: 0;
+    transform: translateY(-40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-fade-down.active {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInDown 0.8s ease;
+}
+
+.scroll-slide-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-slide-left.active {
+    opacity: 1;
+    transform: translateX(0);
+    animation: slideInLeft 0.8s ease;
+}
+
+.scroll-slide-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-slide-right.active {
+    opacity: 1;
+    transform: translateX(0);
+    animation: slideInRight 0.8s ease;
+}
+
+.scroll-scale {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-scale.active {
+    opacity: 1;
+    transform: scale(1);
+    animation: scaleIn 0.8s ease;
+}
+
+.scroll-rotate {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-rotate.active {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+    animation: rotateIn 0.8s ease;
+}
+
+/* ===== EFEITOS VISUAIS ===== */
+.glow-effect {
+    animation: glow 3s ease-in-out infinite;
+}
+
+.pulse-effect {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.float-effect {
+    animation: float 3s ease-in-out infinite;
+}
+
+.border-glow {
+    animation: borderGlow 2s ease-in-out infinite;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+    background-size: 200% center;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textGradient 3s ease infinite;
+}
+
+/* ===== HEADER ===== */
+.header {
+    background: linear-gradient(180deg, rgba(26, 26, 46, 0.9) 0%, rgba(22, 33, 62, 0.5) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: fadeInDown 0.6s ease;
+}
+
+.logo h1 {
+    color: var(--accent-primary);
+    text-shadow: 0 0 20px rgba(217, 70, 166, 0.5);
+    font-size: 1.8em;
+    font-weight: 800;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.logo h1:hover {
+    color: var(--accent-secondary);
+    text-shadow: 0 0 30px rgba(236, 72, 153, 0.8);
+    transform: scale(1.05);
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent-primary);
+    background: rgba(217, 70, 166, 0.1);
+}
+
+.nav-link:hover::before {
+    width: 100%;
+}
+
+.cart-button {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(217, 70, 166, 0.3);
+    position: relative;
+}
+
+.cart-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(217, 70, 166, 0.5);
+    animation: pulse 0.6s ease;
+}
+
+.cart-button:active {
+    transform: translateY(-1px);
+}
+
+.cart-badge {
+    background: var(--error);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 0.8em;
+    margin-left: 8px;
+    animation: pulse 0.5s ease;
+}
+
+/* ===== HERO ===== */
+.hero {
+    background: linear-gradient(135deg, rgba(217, 70, 166, 0.1) 0%, rgba(236, 72, 153, 0.05) 50%, rgba(22, 33, 62, 0.1) 100%);
+    border-bottom: 2px solid var(--border-color);
+    padding: 80px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(217, 70, 166, 0.1) 0%, transparent 70%);
+    animation: shimmer 8s linear infinite;
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h2 {
+    font-size: 3.5em;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    text-shadow: 0 0 30px rgba(217, 70, 166, 0.3);
+    animation: slideInUp 0.8s ease;
+}
+
+.hero h2 .gradient-text {
+    display: inline;
+}
+
+.hero p {
+    font-size: 1.3em;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    animation: slideInUp 1s ease;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: slideInUp 1.2s ease;
+}
+
+.btn {
+    padding: 15px 40px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    box-shadow: 0 8px 20px rgba(217, 70, 166, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(217, 70, 166, 0.5);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--accent-primary);
+    border: 2px solid var(--accent-primary);
+    box-shadow: 0 0 20px rgba(217, 70, 166, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(217, 70, 166, 0.1);
+    box-shadow: 0 0 30px rgba(217, 70, 166, 0.4);
+    transform: translateY(-5px);
+}
+
+/* ===== CATEGORIAS ===== */
+.categories-section {
+    padding: 100px 20px;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+}
+
+.categories-section h2 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 60px;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(217, 70, 166, 0.3);
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.category-card {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(217, 70, 166, 0.05) 100%);
+    border: 1px solid var(--border-color);
+    padding: 40px 25px;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(217, 70, 166, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.category-card:hover {
+    background: linear-gradient(135deg, rgba(217, 70, 166, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%);
+    border-color: var(--accent-primary);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(217, 70, 166, 0.2);
+}
+
+.category-card:hover::before {
+    opacity: 1;
+}
+
+.category-icon {
+    font-size: 3.5em;
+    margin-bottom: 15px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    animation: float 3s ease-in-out infinite;
+}
+
+.category-card:hover .category-icon {
+    transform: scale(1.2) rotate(10deg);
+}
+
+.category-card h3 {
+    color: var(--accent-primary);
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.category-card p {
+    color: var(--text-secondary);
+    font-size: 0.95em;
+}
+
+/* ===== PRODUTOS ===== */
+.products-section {
+    padding: 100px 20px;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.products-section h2 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 60px;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(217, 70, 166, 0.3);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.product-card {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(217, 70, 166, 0.03) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-15px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 20px 50px rgba(217, 70, 166, 0.25);
+}
+
+.product-image {
+    width: 100%;
+    height: 250px;
+    background: linear-gradient(135deg, rgba(217, 70, 166, 0.1), rgba(236, 72, 153, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+
+.product-info {
+    padding: 20px;
+}
+
+.product-name {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.product-category {
+    color: var(--accent-secondary);
+    font-size: 0.85em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.product-description {
+    color: var(--text-secondary);
+    font-size: 0.95em;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.product-price {
+    font-size: 1.5em;
+    color: var(--accent-primary);
+    font-weight: 800;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(217, 70, 166, 0.3);
+}
+
+.product-button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.product-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(217, 70, 166, 0.4);
+}
+
+.product-button:active {
+    transform: scale(0.98);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+    border-top: 2px solid var(--border-color);
+    padding: 60px 20px 20px;
+    color: var(--text-secondary);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+}
+
+.footer-section h4 {
+    color: var(--accent-primary);
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.footer-section a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.footer-section a:hover {
+    color: var(--accent-primary);
+    transform: translateX(5px);
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    .hero h2 {
+        font-size: 2.2em;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .categories-section h2,
+    .products-section h2 {
+        font-size: 2em;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 15px 10px;
+    }
+
+    .logo h1 {
+        font-size: 1.3em;
+    }
+
+    .hero {
+        padding: 40px 15px;
+    }
+
+    .hero h2 {
+        font-size: 1.8em;
+    }
+
+    .hero p {
+        font-size: 1em;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}

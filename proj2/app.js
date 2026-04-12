@@ -5,19 +5,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const featuredProducts = document.getElementById('featured-products');
     if (featuredProducts) {
         const featured = PRODUCTS.slice(0, 6);
-        featuredProducts.innerHTML = featured.map(product => `
-            <div class="product-card">
+        featuredProducts.innerHTML = featured.map((product, index) => `
+            <div class="product-card scroll-fade-up" data-delay="${index * 100}">
                 <div class="product-image">
                     <img src="${product.image}" alt="${product.name}">
                 </div>
                 <div class="product-info">
-                    <h3>${product.name}</h3>
-                    <p class="category-badge">${product.category}</p>
-                    <p class="product-desc">${product.description.substring(0, 80)}...</p>
-                    <div class="product-footer">
-                        <span class="price">R$ ${product.price.toFixed(2)}</span>
-                        <a href="produto.html?id=${product.id}" class="btn btn-small">Ver Detalhes</a>
-                    </div>
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-category">${product.category}</p>
+                    <p class="product-description">${product.description.substring(0, 80)}...</p>
+                    <div class="product-price">R$ ${product.price.toFixed(2)}</div>
+                    <a href="produto.html?id=${product.id}" class="product-button">Ver Detalhes</a>
                 </div>
             </div>
         `).join('');
