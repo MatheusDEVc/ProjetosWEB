@@ -1,0 +1,241 @@
+🚀 BACKEND - QUICK START (5 MINUTOS)
+═════════════════════════════════════════════════════════════════════
+
+PASSO 1: Preparar pasta
+══════════════════════
+
+1. Abra CMD/PowerShell
+2. Navegue até: C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2
+3. Crie a pasta backend:
+   mkdir backend
+   cd backend
+
+PASSO 2: Instalar dependências
+═════════════════════════════
+
+1. Copie o arquivo "backend-package.json" para pasta backend
+2. Renomeie para "package.json"
+3. No CMD (já na pasta backend), execute:
+   npm install
+
+   ⏳ Aguarde 2-3 minutos (vai baixar ~200MB)
+   ✅ Resultado: pasta "node_modules" criada
+
+PASSO 3: Criar arquivos
+═══════════════════════
+
+1. Crie arquivo ".env" na pasta backend com:
+   ┌─────────────────────────────────────┐
+   │ NODE_ENV=development                │
+   │ PORT=5000                           │
+   │ JWT_SECRET=seu_secret_super_seguro  │
+   │ CORS_ORIGIN=http://localhost:3000   │
+   └─────────────────────────────────────┘
+
+2. Copie o arquivo "BACKEND_SERVER.js"
+3. Renomeie para "server.js" na pasta backend
+
+PASSO 4: Iniciar servidor
+═════════════════════════
+
+1. No CMD (pasta backend), execute:
+   npm run dev
+
+2. Você deve ver:
+   ┌─────────────────────────────────────────────┐
+   │ ✨ GLOWUP STORE BACKEND                     │
+   │                                             │
+   │ 🚀 Servidor: http://localhost:5000         │
+   │ 📊 Health: http://localhost:5000/api/health │
+   └─────────────────────────────────────────────┘
+
+✅ PRONTO! Backend rodando!
+
+PASSO 5: Testar endpoints
+═════════════════════════
+
+Abra Postman ou use curl para testar:
+
+1. Health Check:
+   GET http://localhost:5000/api/health
+   
+   Esperado: {"status":"OK", "timestamp":"..."}
+
+2. Registrar Usuário:
+   POST http://localhost:5000/api/auth/register
+   Body (JSON):
+   {
+     "email": "teste@email.com",
+     "password": "senha123",
+     "full_name": "João Silva",
+     "phone": "11987654321",
+     "cpf": "12345678900"
+   }
+   
+   Esperado: Token JWT retornado
+
+3. Fazer Login:
+   POST http://localhost:5000/api/auth/login
+   Body:
+   {
+     "email": "teste@email.com",
+     "password": "senha123"
+   }
+   
+   Esperado: Token JWT retornado
+
+4. Listar Produtos:
+   GET http://localhost:5000/api/products
+   
+   Esperado: 5 produtos de exemplo
+
+═════════════════════════════════════════════════════════════════════
+
+ESTRUTURA FINAL:
+════════════════
+
+backend/
+├── node_modules/        ← criado automaticamente por npm install
+├── package.json         ← dependências (copie de backend-package.json)
+├── .env                 ← configurações (crie manualmente)
+├── server.js            ← servidor principal (copie de BACKEND_SERVER.js)
+└── database.db          ← criado automaticamente ao rodar server
+
+═════════════════════════════════════════════════════════════════════
+
+ENDPOINTS DISPONÍVEIS AGORA:
+═════════════════════════════
+
+1. POST /api/auth/register
+   └─ Registrar novo usuário
+
+2. POST /api/auth/login
+   └─ Fazer login
+
+3. GET /api/products
+   └─ Listar todos os produtos
+
+4. POST /api/products/:id/price
+   └─ Validar preço de um produto
+   └─ Header: Authorization: Bearer <token>
+
+5. POST /api/orders
+   └─ Criar novo pedido
+   └─ Header: Authorization: Bearer <token>
+
+6. GET /api/orders
+   └─ Listar meus pedidos
+   └─ Header: Authorization: Bearer <token>
+
+7. GET /api/admin/orders
+   └─ [ADMIN] Listar todos os pedidos
+   └─ Header: Authorization: Bearer <token>
+
+8. PUT /api/admin/orders/:id/status
+   └─ [ADMIN] Atualizar status do pedido
+   └─ Header: Authorization: Bearer <token>
+
+═════════════════════════════════════════════════════════════════════
+
+CONECTAR FRONTEND AO BACKEND:
+════════════════════════════
+
+Para conectar o site frontend ao backend:
+
+1. Abra checkout.js no frontend
+2. Localize a função saveOrder()
+3. Substitua por:
+
+async function saveOrder(orderData) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Pedido salvo!');
+            localStorage.removeItem('glowupCart');
+            window.location.href = 'pedidos.html';
+        } else {
+            alert('Erro: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao salvar pedido');
+    }
+}
+
+═════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING:
+═════════════════
+
+Erro: "npm: comando não encontrado"
+└─ Solução: Node.js não instalado, baixe em nodejs.org
+
+Erro: "EADDRINUSE: port 5000 already in use"
+└─ Solução: Mude PORT em .env para 5001, ou mate processo anterior
+
+Erro: "Cannot find module 'express'"
+└─ Solução: npm install novamente
+
+Erro: "SQLITE_CANTOPEN"
+└─ Solução: Verifique permissões de pasta
+
+Servidor não inicia:
+└─ Solução: Verifique sintaxe do server.js com: node -c server.js
+
+═════════════════════════════════════════════════════════════════════
+
+PRÓXIMOS PASSOS:
+════════════════
+
+Depois que o backend funcionar:
+
+1. ✅ Testar todos os endpoints
+2. ✅ Conectar frontend ao backend
+3. ✅ Testar fluxo completo (registrar → login → criar pedido)
+4. ⏳ PRÓXIMA FASE: Integrar MercadoPago
+5. ⏳ Deploy em servidor de produção
+
+═════════════════════════════════════════════════════════════════════
+
+CREDENCIAIS PARA TESTES:
+═════════════════════════
+
+Email: teste@email.com
+Senha: senha123
+CPF: 12345678900
+Telefone: 11987654321
+
+Usar para testar login/pedidos
+
+═════════════════════════════════════════════════════════════════════
+
+🎯 OBJETIVO ALCANÇADO!
+
+Você agora tem um backend Node.js completo, seguro e pronto para usar:
+
+✅ Autenticação com JWT
+✅ Validação de preços no servidor
+✅ Criação de pedidos com verificação
+✅ Admin panel com permissões
+✅ SQLite database
+✅ Rate limiting
+✅ CORS seguro
+✅ Error handling
+
+Status: PRONTO PARA TESTES E DESENVOLVIMENTO
+
+═════════════════════════════════════════════════════════════════════
+
+Desenvolvido para GlowUp Store
+Backend v1.0 - Pronto para Usar
