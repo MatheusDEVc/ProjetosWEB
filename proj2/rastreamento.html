@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreamento de Pedido - GlowUp Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+    <style>
+        .tracking-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tracking-header {
+            background: linear-gradient(135deg, #d946a6, #ec4899);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .tracking-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .tracking-status-badge {
+            display: inline-block;
+            background: white;
+            color: #d946a6;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+            margin: 40px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 40px;
+            top: 80px;
+            width: 2px;
+            height: 30px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-item.completed::before {
+            background: #10b981;
+        }
+
+        .timeline-dot {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: 3px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.1);
+        }
+
+        .timeline-item.active .timeline-dot {
+            background: #d946a6;
+            border-color: #d946a6;
+            box-shadow: 0 0 0 8px rgba(217, 70, 166, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 8px rgba(217, 70, 166, 0.1); }
+            50% { box-shadow: 0 0 0 16px rgba(217, 70, 166, 0.05); }
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding-top: 5px;
+        }
+
+        .timeline-content h3 {
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content p {
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d946a6, #ec4899);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .order-details-box {
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .order-details-box h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .empty-order {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+
+        .empty-order h2 {
+            color: #d946a6;
+            margin-bottom: 10px;
+        }
+
+        .empty-order p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>✨ GlowUp Store</h1>
+                </div>
+                <nav class="nav-main">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="masculino.html" class="nav-link">Masculino</a>
+                    <a href="feminino.html" class="nav-link">Feminino</a>
+                    <a href="pedidos.html" class="nav-link active">Meus Pedidos</a>
+                </nav>
+                <div class="header-actions">
+                    <button id="cart-btn" class="cart-button">
+                        🛒 Carrinho <span id="cart-count" class="cart-badge">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="tracking-container">
+                <a href="pedidos.html" class="btn btn-small" style="margin-bottom: 20px;">← Voltar para Meus Pedidos</a>
+
+                <div id="tracking-content">
+                    <!-- Preenchido pelo JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Sobre Nós</h4>
+                    <p>GlowUp Store - Seu destino confiável para produtos de saúde e beleza de qualidade premium.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contato</h4>
+                    <p>Email: contato@glowupstore.com</p>
+                    <p>Telefone: (11) 99999-9999</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links Úteis</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="pedidos.html">Meus Pedidos</a></li>
+                        <li><a href="index.html">Continuar Comprando</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GlowUp Store. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="orders.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderNumber = urlParams.get('pedido');
+
+            if (!orderNumber) {
+                showError('Nenhum pedido especificado');
+                return;
+            }
+
+            const order = getOrder(orderNumber);
+            if (!order) {
+                showError('Pedido não encontrado');
+                return;
+            }
+
+            displayTracking(order);
+        });
+
+        function displayTracking(order) {
+            const container = document.getElementById('tracking-content');
+            const progress = getOrderProgress(order.currentStatus);
+            const statusInfo = ORDER_STATUSES[order.currentStatus];
+
+            let html = `
+                <div class="tracking-header">
+                    <h2>Rastreamento do Pedido</h2>
+                    <p style="margin: 10px 0; font-size: 16px;">Pedido #${order.orderNumber}</p>
+                    <div class="tracking-status-badge">
+                        ${statusInfo.icon} ${statusInfo.label}
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Confirmado</span>
+                    <span>Entregue</span>
+                </div>
+
+                <div class="timeline">
+                    ${order.statusHistory.map((item, index) => {
+                        const isCompleted = index < order.statusHistory.length - 1 || order.currentStatus === item.status;
+                        const isActive = order.currentStatus === item.status;
+                        const itemStatus = ORDER_STATUSES[item.status] || {};
+                        
+                        return `
+                            <div class="timeline-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                                <div class="timeline-dot">${itemStatus.icon || '📦'}</div>
+                                <div class="timeline-content">
+                                    <h3>${itemStatus.label || item.status}</h3>
+                                    <p>${item.message}</p>
+                                    <p class="timeline-date">${formatDateTime(item.timestamp)}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div class="order-details-box">
+                    <h3>Detalhes do Pedido</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Número do Pedido:</span>
+                        <span class="detail-value">${order.orderNumber}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Data do Pedido:</span>
+                        <span class="detail-value">${formatDate(order.createdAt)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Entrega Estimada:</span>
+                        <span class="detail-value">${formatDate(order.estimatedDelivery)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status Atual:</span>
+                        <span class="detail-value" style="color: ${statusInfo.color};">
+                            ${statusInfo.icon} ${statusInfo.label}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Valor Total:</span>
+                        <span class="detail-value">R$ ${order.total.toFixed(2)}</span>
+                    </div>
+                </div>
+
+                <div class="order-details-box">
+                    <h3>Endereço de Entrega</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Destinatário:</span>
+                        <span class="detail-value">${order.customerData.fullName}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Endereço:</span>
+                        <span class="detail-value">${order.customerData.address}, ${order.customerData.number}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Complemento:</span>
+                        <span class="detail-value">${order.customerData.complement || '-'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Cidade/Estado:</span>
+                        <span class="detail-value">${order.customerData.city}, ${order.customerData.state}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">CEP:</span>
+                        <span class="detail-value">${order.customerData.zip}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Telefone:</span>
+                        <span class="detail-value">${order.customerData.phone}</span>
+                    </div>
+                </div>
+
+                <div class="order-details-box">
+                    <h3>Produtos (${order.items.length})</h3>
+                    ${order.items.map(item => {
+                        const product = PRODUCTS.find(p => p.id === item.id);
+                        return `
+                            <div class="detail-row">
+                                <span class="detail-label">${product ? product.name : 'Produto'} x${item.quantity}</span>
+                                <span class="detail-value">R$ ${product ? (product.price * item.quantity).toFixed(2) : '0,00'}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div class="action-buttons">
+                    <a href="pedidos.html" class="btn btn-primary">Ver Todos os Pedidos</a>
+                    <a href="index.html" class="btn btn-secondary">Continuar Comprando</a>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('tracking-content');
+            container.innerHTML = `
+                <div class="empty-order">
+                    <h2>❌ Erro</h2>
+                    <p>${message}</p>
+                    <a href="pedidos.html" class="btn btn-primary">Voltar para Meus Pedidos</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Produto - GlowUp Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>✨ GlowUp Store</h1>
+                </div>
+                <nav class="nav-main">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="masculino.html" class="nav-link">Masculino</a>
+                    <a href="feminino.html" class="nav-link">Feminino</a>
+                    <a href="pedidos.html" class="nav-link">Meus Pedidos</a>
+                </nav>
+                <div class="header-actions">
+                    <button id="cart-btn" class="cart-button">
+                        🛒 Carrinho <span id="cart-count" class="cart-badge">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / <span id="breadcrumb-category">Produto</span>
+            </div>
+
+            <div class="product-detail">
+                <div class="product-detail-image">
+                    <img id="product-image" src="" alt="">
+                </div>
+
+                <div class="product-detail-info">
+                    <h1 id="product-name"></h1>
+                    <p class="product-category" id="product-category"></p>
+                    
+                    <div class="product-rating">
+                        <span class="stars">⭐⭐⭐⭐⭐</span>
+                        <span>(248 avaliações)</span>
+                    </div>
+
+                    <div class="product-price-section">
+                        <span class="price" id="product-price"></span>
+                        <span class="availability" id="availability">Em estoque</span>
+                    </div>
+
+                    <div class="product-description" id="product-description"></div>
+
+                    <div class="product-specs">
+                        <h3>Especificações</h3>
+                        <ul id="product-specs"></ul>
+                    </div>
+
+                    <div class="product-purchase">
+                        <div class="quantity-selector">
+                            <label for="quantity">Quantidade:</label>
+                            <div class="quantity-box">
+                                <button id="qty-minus" class="qty-btn">−</button>
+                                <input type="number" id="quantity" value="1" min="1">
+                                <button id="qty-plus" class="qty-btn">+</button>
+                            </div>
+                        </div>
+
+                        <button id="add-to-cart-btn" class="btn btn-primary btn-large">
+                            🛒 Adicionar ao Carrinho
+                        </button>
+                    </div>
+
+                    <div class="product-benefits">
+                        <h3>Benefícios Principais</h3>
+                        <ul id="product-benefits"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produtos Relacionados -->
+            <section class="related-products">
+                <h2>Produtos Relacionados</h2>
+                <div id="related-products" class="products-grid">
+                    <!-- Preenchido pelo JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Sobre Nós</h4>
+                    <p>GlowUp Store - Seu destino confiável para produtos de saúde e beleza de qualidade premium.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contato</h4>
+                    <p>Email: contato@glowupstore.com</p>
+                    <p>Telefone: (11) 99999-9999</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links Úteis</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="masculino.html">Masculino</a></li>
+                        <li><a href="feminino.html">Feminino</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GlowUp Store. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="app.js"></script>
+    <script>
+        let currentProduct = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = parseInt(urlParams.get('id'));
+            
+            currentProduct = PRODUCTS.find(p => p.id === productId);
+            if (currentProduct) {
+                loadProductDetail(currentProduct);
+                loadRelatedProducts(currentProduct);
+            } else {
+                document.querySelector('.product-detail').innerHTML = '<p>Produto não encontrado</p>';
+            }
+
+            setupQuantityControls();
+            setupAddToCart();
+        });
+
+        function loadProductDetail(product) {
+            document.getElementById('product-name').textContent = product.name;
+            document.getElementById('product-category').textContent = product.category + ' - ' + product.gender;
+            document.getElementById('product-price').textContent = 'R$ ' + product.price.toFixed(2);
+            document.getElementById('product-image').src = product.image;
+            document.getElementById('product-image').alt = product.name;
+            document.getElementById('product-description').innerHTML = product.fullDescription || product.description;
+            document.getElementById('breadcrumb-category').textContent = product.category;
+
+            const specsList = document.getElementById('product-specs');
+            specsList.innerHTML = product.specs.map(spec => `<li>${spec}</li>`).join('');
+
+            const benefitsList = document.getElementById('product-benefits');
+            benefitsList.innerHTML = product.benefits.map(benefit => `<li>${benefit}</li>`).join('');
+        }
+
+        function loadRelatedProducts(product) {
+            const related = PRODUCTS.filter(p => 
+                p.category === product.category && p.id !== product.id
+            ).slice(0, 4);
+
+            document.getElementById('related-products').innerHTML = related.map(prod => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${prod.image}" alt="${prod.name}">
+                    </div>
+                    <div class="product-info">
+                        <h3>${prod.name}</h3>
+                        <p class="category-badge">${prod.category}</p>
+                        <div class="product-footer">
+                            <span class="price">R$ ${prod.price.toFixed(2)}</span>
+                            <a href="produto.html?id=${prod.id}" class="btn btn-small">Ver Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupQuantityControls() {
+            const qtyInput = document.getElementById('quantity');
+            document.getElementById('qty-minus').addEventListener('click', () => {
+                if (qtyInput.value > 1) qtyInput.value--;
+            });
+            document.getElementById('qty-plus').addEventListener('click', () => {
+                qtyInput.value++;
+            });
+        }
+
+        function setupAddToCart() {
+            document.getElementById('add-to-cart-btn').addEventListener('click', function() {
+                const quantity = parseInt(document.getElementById('quantity').value);
+                addToCart(currentProduct.id, quantity);
+                alert('Produto adicionado ao carrinho!');
+                document.getElementById('quantity').value = 1;
+            });
+        }
+    </script>
+</body>
+</html>

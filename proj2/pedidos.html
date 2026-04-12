@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos - GlowUp Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>✨ GlowUp Store</h1>
+                </div>
+                <nav class="nav-main">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="masculino.html" class="nav-link">Masculino</a>
+                    <a href="feminino.html" class="nav-link">Feminino</a>
+                    <a href="pedidos.html" class="nav-link active">Meus Pedidos</a>
+                </nav>
+                <div class="header-actions">
+                    <button id="cart-btn" class="cart-button">
+                        🛒 Carrinho <span id="cart-count" class="cart-badge">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Meus Pedidos</h1>
+            <p>Acompanhe o status de todos os seus pedidos</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="orders-container">
+                <!-- Empty State -->
+                <div id="empty-orders" class="empty-orders" style="display: none;">
+                    <div class="empty-content">
+                        <div class="empty-icon">📭</div>
+                        <h2>Nenhum pedido encontrado</h2>
+                        <p>Você ainda não realizou nenhuma compra.</p>
+                        <a href="index.html" class="btn btn-primary">Começar a Comprar</a>
+                    </div>
+                </div>
+
+                <!-- Orders List -->
+                <div id="orders-list" class="orders-list">
+                    <!-- Preenchido pelo JavaScript -->
+                </div>
+
+                <!-- Filter/Sort Options -->
+                <div class="orders-filters" style="margin-bottom: 30px;">
+                    <div class="filter-group">
+                        <label for="status-filter">Filtrar por Status:</label>
+                        <select id="status-filter">
+                            <option value="">Todos os status</option>
+                            <option value="confirmado">Pedido Confirmado</option>
+                            <option value="processando">Em Processamento</option>
+                            <option value="preparando">Preparando Pedido</option>
+                            <option value="enviado">Saiu para Entrega</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Sobre Nós</h4>
+                    <p>GlowUp Store - Seu destino confiável para produtos de saúde e beleza de qualidade premium.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contato</h4>
+                    <p>Email: contato@glowupstore.com</p>
+                    <p>Telefone: (11) 99999-9999</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links Úteis</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="masculino.html">Masculino</a></li>
+                        <li><a href="feminino.html">Feminino</a></li>
+                        <li><a href="pedidos.html">Meus Pedidos</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GlowUp Store. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="orders.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+            setupFilters();
+        });
+
+        function loadOrders() {
+            const orders = getAllOrders();
+            const container = document.getElementById('orders-list');
+            const emptyState = document.getElementById('empty-orders');
+
+            if (orders.length === 0) {
+                emptyState.style.display = 'block';
+                container.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.style.display = 'block';
+
+            container.innerHTML = orders.reverse().map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h3>Pedido #${order.orderNumber}</h3>
+                            <p class="order-date">Realizado em ${formatDate(order.createdAt)}</p>
+                        </div>
+                        <div class="order-status">
+                            <span class="status-badge" style="background-color: ${ORDER_STATUSES[order.currentStatus].color}">
+                                ${ORDER_STATUSES[order.currentStatus].icon} ${ORDER_STATUSES[order.currentStatus].label}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="order-body">
+                        <div class="order-items">
+                            <h4>Produtos (${order.items.length})</h4>
+                            <div class="order-items-list">
+                                ${order.items.map(item => {
+                                    const product = PRODUCTS.find(p => p.id === item.id);
+                                    return `
+                                        <div class="order-item">
+                                            <div class="item-name">${product ? product.name : 'Produto'}</div>
+                                            <div class="item-qty">Qty: ${item.quantity}</div>
+                                            <div class="item-price">R$ ${product ? (product.price * item.quantity).toFixed(2) : '0,00'}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span>R$ ${(order.total - 15).toFixed(2)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Frete:</span>
+                                <span>R$ 15,00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total:</span>
+                                <span>R$ ${order.total.toFixed(2)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Método de Pagamento:</span>
+                                <span>${order.paymentMethod === 'credit' ? '💳 Cartão de Crédito' : 
+                                       order.paymentMethod === 'debit' ? '🏦 Cartão de Débito' :
+                                       order.paymentMethod === 'pix' ? '📱 PIX' : '📋 Boleto'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-footer">
+                        <p class="delivery-estimate">📅 Entrega estimada: ${formatDate(order.estimatedDelivery)}</p>
+                        <a href="rastreamento.html?pedido=${order.orderNumber}" class="btn btn-small">Ver Rastreamento</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupFilters() {
+            const filterSelect = document.getElementById('status-filter');
+            filterSelect.addEventListener('change', function() {
+                filterOrders(this.value);
+            });
+        }
+
+        function filterOrders(status) {
+            const orders = getAllOrders();
+            const container = document.getElementById('orders-list');
+
+            let filtered = orders;
+            if (status) {
+                filtered = orders.filter(o => o.currentStatus === status);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-filter">
+                        <p>Nenhum pedido encontrado com este status</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.reverse().map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h3>Pedido #${order.orderNumber}</h3>
+                            <p class="order-date">Realizado em ${formatDate(order.createdAt)}</p>
+                        </div>
+                        <div class="order-status">
+                            <span class="status-badge" style="background-color: ${ORDER_STATUSES[order.currentStatus].color}">
+                                ${ORDER_STATUSES[order.currentStatus].icon} ${ORDER_STATUSES[order.currentStatus].label}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="order-body">
+                        <div class="order-items">
+                            <h4>Produtos (${order.items.length})</h4>
+                            <div class="order-items-list">
+                                ${order.items.map(item => {
+                                    const product = PRODUCTS.find(p => p.id === item.id);
+                                    return `
+                                        <div class="order-item">
+                                            <div class="item-name">${product ? product.name : 'Produto'}</div>
+                                            <div class="item-qty">Qty: ${item.quantity}</div>
+                                            <div class="item-price">R$ ${product ? (product.price * item.quantity).toFixed(2) : '0,00'}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span>R$ ${(order.total - 15).toFixed(2)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Frete:</span>
+                                <span>R$ 15,00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total:</span>
+                                <span>R$ ${order.total.toFixed(2)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Método de Pagamento:</span>
+                                <span>${order.paymentMethod === 'credit' ? '💳 Cartão de Crédito' : 
+                                       order.paymentMethod === 'debit' ? '🏦 Cartão de Débito' :
+                                       order.paymentMethod === 'pix' ? '📱 PIX' : '📋 Boleto'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-footer">
+                        <p class="delivery-estimate">📅 Entrega estimada: ${formatDate(order.estimatedDelivery)}</p>
+                        <a href="rastreamento.html?pedido=${order.orderNumber}" class="btn btn-small">Ver Rastreamento</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

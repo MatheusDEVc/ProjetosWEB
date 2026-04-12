@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowUp Store - Produtos de Saúde e Beleza</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>✨ GlowUp Store</h1>
+                </div>
+                <nav class="nav-main">
+                    <a href="index.html" class="nav-link active">Home</a>
+                    <a href="masculino.html" class="nav-link">Masculino</a>
+                    <a href="feminino.html" class="nav-link">Feminino</a>
+                    <a href="pedidos.html" class="nav-link">Meus Pedidos</a>
+                </nav>
+                <div class="header-actions">
+                    <button id="cart-btn" class="cart-button">
+                        🛒 Carrinho <span id="cart-count" class="cart-badge">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Bem-vindo à GlowUp Store</h2>
+            <p>Sua fonte confiável para produtos de saúde e beleza premium</p>
+            <div class="hero-buttons">
+                <a href="masculino.html" class="btn btn-primary">Explorar Masculino</a>
+                <a href="feminino.html" class="btn btn-secondary">Explorar Feminino</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Categorias em Destaque -->
+            <section class="categories-section">
+                <h2>Nossas Categorias</h2>
+                <div class="categories-grid">
+                    <div class="category-card">
+                        <h3>💧 Skincare</h3>
+                        <p>Cuidados completos para sua pele</p>
+                    </div>
+                    <div class="category-card">
+                        <h3>💊 Suplementos</h3>
+                        <p>Nutrição e saúde em primeiro lugar</p>
+                    </div>
+                    <div class="category-card">
+                        <h3>💄 Maquiagem</h3>
+                        <p>Realce sua beleza natural</p>
+                    </div>
+                    <div class="category-card">
+                        <h3>🌸 Perfumaria</h3>
+                        <p>Aromas que marcam presença</p>
+                    </div>
+                    <div class="category-card">
+                        <h3>📚 eBooks</h3>
+                        <p>Conhecimento sobre beleza e saúde</p>
+                    </div>
+                    <div class="category-card">
+                        <h3>🍳 Receitas</h3>
+                        <p>Receitas saudáveis e deliciosas</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Produtos em Destaque -->
+            <section class="featured-section">
+                <h2>Produtos em Destaque</h2>
+                <div id="featured-products" class="products-grid">
+                    <!-- Preenchido pelo JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Sobre Nós</h4>
+                    <p>GlowUp Store - Seu destino confiável para produtos de saúde e beleza de qualidade premium.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contato</h4>
+                    <p>Email: contato@glowupstore.com</p>
+                    <p>Telefone: (11) 99999-9999</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links Úteis</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="masculino.html">Masculino</a></li>
+                        <li><a href="feminino.html">Feminino</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GlowUp Store. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
