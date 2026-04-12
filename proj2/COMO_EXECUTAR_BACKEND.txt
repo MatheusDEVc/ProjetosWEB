@@ -1,0 +1,249 @@
+╔════════════════════════════════════════════════════════════════════╗
+║          🚀 GLOWUP BACKEND - COMO EXECUTAR AGORA MESMO 🚀        ║
+╚════════════════════════════════════════════════════════════════════╝
+
+TODO FOI PREPARADO! SÓ PRECISA EXECUTAR!
+
+═════════════════════════════════════════════════════════════════════
+
+⚡ OPÇÃO 1: SETUP AUTOMÁTICO (Recomendado - 3 cliques!)
+═══════════════════════════════════════════════════════════════════
+
+PASSO 1: Abra a Pasta backend
+─────────────────────────────
+
+1. Abra o Explorador de Arquivos do Windows
+2. Navegue até:
+   C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+
+3. Você deve ver estes arquivos:
+   ├── setup.bat                ← CLIQUE AQUI!
+   ├── server.js
+   ├── package.json
+   ├── .env
+   ├── database.db
+   └── README.md
+
+PASSO 2: Execute setup.bat
+──────────────────────────
+
+1. Clique com o botão DIREITO em "setup.bat"
+2. Selecione "Executar como administrador" (importante!)
+3. Uma janela CMD vai abrir
+
+Você vai ver (durante a instalação):
+   [1/4] Limpando arquivos antigos...
+   [2/4] Movendo novo server...
+   [3/4] Deletando node_modules antigos...
+   [4/4] Instalando dependências com npm install...
+
+Aguarde 2-3 minutos (pode levar um pouco!)
+
+Quando terminar, você vai ver:
+   ======================================
+   ✅ SETUP COMPLETO!
+   ======================================
+   
+   Para iniciar o servidor, execute:
+      npm run dev
+   
+   Servidor rodará em:
+      http://localhost:5000
+
+Pressione uma tecla para fechar
+
+PASSO 3: Inicie o Servidor
+──────────────────────────
+
+Abra uma nova janela de CMD/PowerShell e execute:
+
+    cd C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+    npm run dev
+
+Você deve ver:
+    ✨ GLOWUP STORE BACKEND
+    
+    🚀 Servidor: http://localhost:5000
+    📊 Health: http://localhost:5000/api/health
+    
+    Endpoints:
+    POST   /api/auth/register
+    POST   /api/auth/login
+    GET    /api/products
+    POST   /api/products/:id/price
+    POST   /api/orders
+    GET    /api/orders
+    GET    /api/admin/orders (admin)
+    PUT    /api/admin/orders/:id/status (admin)
+
+✅ SE VIR ISSO, O BACKEND ESTÁ RODANDO COM SUCESSO!
+
+═════════════════════════════════════════════════════════════════════
+
+⚡ OPÇÃO 2: SETUP MANUAL (Passo a Passo)
+═══════════════════════════════════════════════════════════════════
+
+Se preferir fazer manualmente (não recomendado):
+
+PASSO 1: Abra CMD
+─────────────────
+1. Pressione Windows + R
+2. Digite: cmd
+3. Pressione Enter
+
+PASSO 2: Navegue até a pasta backend
+─────────────────────────────────────
+Digite no CMD:
+    cd C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+
+PASSO 3: Instale dependências
+──────────────────────────────
+Digite no CMD:
+    npm install
+
+Aguarde 2-3 minutos enquanto as dependências são baixadas...
+
+PASSO 4: Inicie o servidor
+──────────────────────────
+Digite no CMD:
+    npm run dev
+
+Você deve ver a mensagem de sucesso
+
+═════════════════════════════════════════════════════════════════════
+
+✅ PASSO 4: TESTE O SERVIDOR
+══════════════════════════════
+
+Agora que o servidor está rodando:
+
+OPÇÃO A: Via Navegador
+──────────────────────
+1. Abra seu navegador favorito (Chrome, Edge, Firefox, etc)
+2. Digite na barra de endereço:
+   http://localhost:5000/api/health
+
+3. Você deve ver:
+   {"status":"OK","timestamp":"2024-04-12T..."}
+
+OPÇÃO B: Via Postman
+────────────────────
+1. Baixe Postman: https://www.postman.com/downloads/
+2. Abra Postman
+3. Crie nova requisição GET
+4. URL: http://localhost:5000/api/health
+5. Clique "Send"
+6. Você deve ver a resposta JSON
+
+OPÇÃO C: Via Terminal/CMD
+──────────────────────────
+1. Abra novo CMD
+2. Digite:
+   curl http://localhost:5000/api/health
+
+3. Você deve ver a resposta JSON
+
+═════════════════════════════════════════════════════════════════════
+
+🎯 TESTAR OS ENDPOINTS
+═══════════════════════
+
+Com Postman, você pode testar:
+
+REGISTRAR NOVO USUÁRIO:
+   POST http://localhost:5000/api/auth/register
+   
+   Body (JSON):
+   {
+     "email": "teste@gmail.com",
+     "password": "senha123",
+     "full_name": "João Silva",
+     "phone": "11987654321",
+     "cpf": "12345678900"
+   }
+   
+   Resultado esperado: Token JWT retornado
+
+FAZER LOGIN:
+   POST http://localhost:5000/api/auth/login
+   
+   Body (JSON):
+   {
+     "email": "teste@gmail.com",
+     "password": "senha123"
+   }
+   
+   Resultado esperado: Token JWT retornado
+
+LISTAR PRODUTOS:
+   GET http://localhost:5000/api/products
+   
+   Resultado esperado: Lista de 5 produtos
+
+═════════════════════════════════════════════════════════════════════
+
+❌ SE ALGO DER ERRADO
+══════════════════════
+
+Erro 1: "npm: comando não encontrado"
+├─ Significa: Node.js não está instalado
+├─ Solução 1: Instale Node.js em https://nodejs.org/
+├─ Solução 2: Reinicie o computador depois de instalar
+└─ Solução 3: Teste com: node --version
+
+Erro 2: "EADDRINUSE: port 5000 already in use"
+├─ Significa: Outra aplicação está usando a porta 5000
+├─ Solução 1: Execute em outro terminal
+├─ Solução 2: Feche aplicações que usam porta 5000
+├─ Solução 3: Mude PORT em .env para 5001
+└─ Depois: npm run dev
+
+Erro 3: "Cannot find module 'express'"
+├─ Significa: Dependências não estão instaladas
+├─ Solução: Execute setup.bat novamente
+
+Erro 4: "ENOENT: no such file or directory"
+├─ Significa: Pasta ou arquivo faltando
+├─ Solução: Certifique-se de estar na pasta correta
+└─ Digite: cd C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+
+═════════════════════════════════════════════════════════════════════
+
+📋 CHECKLIST FINAL
+═══════════════════
+
+[ ] 1. setup.bat foi executado
+[ ] 2. npm install terminou com sucesso
+[ ] 3. npm run dev está rodando
+[ ] 4. Abri http://localhost:5000/api/health
+[ ] 5. Vi a resposta JSON no navegador
+[ ] 6. Servidor está funcionando! ✅
+
+═════════════════════════════════════════════════════════════════════
+
+🎉 PARABÉNS!
+═════════════
+
+Seu backend Node.js está rodando com sucesso! 🎉
+
+Agora você pode:
+✅ Testar todos os endpoints
+✅ Conectar o frontend
+✅ Trabalhar na integração com MercadoPago
+✅ Administrar pedidos
+
+═════════════════════════════════════════════════════════════════════
+
+🆘 PRECISA DE AJUDA?
+══════════════════════
+
+Leia os guias em português:
+1. BACKEND_RESUMO.txt - Resumo visual
+2. SETUP_AUTOMATIZADO.txt - Setup simplificado
+3. BACKEND_QUICK_START.txt - Quick start rápido
+4. README.md - Documentação completa
+
+═════════════════════════════════════════════════════════════════════
+
+Desenvolvido para GlowUp Store
+Pronto para Usar! ✅
