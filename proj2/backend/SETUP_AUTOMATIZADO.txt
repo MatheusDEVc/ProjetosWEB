@@ -1,0 +1,90 @@
+🚀 SETUP AUTOMATIZADO - BACKEND GLOWUP STORE
+═════════════════════════════════════════════════════════════════════
+
+✨ TUDO FEITO AUTOMATICAMENTE - SÓ PRECISA CLICAR!
+
+PASSO 1: Abra o arquivo setup.bat
+═════════════════════════════════
+
+1. Navegue até: C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+2. Procure pelo arquivo: setup.bat
+3. Clique 2 vezes no arquivo
+
+O script vai automaticamente:
+✅ Limpar arquivos antigos
+✅ Configurar package.json correto
+✅ Remover node_modules antigos
+✅ Rodar npm install (pode levar 2-3 minutos)
+
+Quando terminar, você verá a mensagem:
+   ✅ SETUP COMPLETO!
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 2: Iniciar o servidor
+════════════════════════════
+
+Depois que setup.bat terminar:
+
+Opção A - Via CMD (recomendado):
+1. Abra CMD
+2. Digite: cd C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend
+3. Digite: npm run dev
+
+Opção B - Via PowerShell:
+1. Abra PowerShell
+2. Digite: cd "C:\Users\CARLA\Documents\Algorithms\Vibe Code\proj2\backend"
+3. Digite: npm run dev
+
+Você deve ver:
+┌─────────────────────────────────────────┐
+│ ✨ GLOWUP STORE BACKEND                 │
+│                                         │
+│ 🚀 Servidor: http://localhost:5000     │
+│ 📊 Health: http://localhost:5000/api/health │
+└─────────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════
+
+PASSO 3: Testar o servidor
+═════════════════════════════
+
+Abra seu navegador e acesse:
+
+✅ http://localhost:5000/api/health
+
+Você deve ver:
+{"status":"OK","timestamp":"2024-04-12T16:20:29.754Z"}
+
+Se vir isso, o backend está rodando com sucesso! ✅
+
+═════════════════════════════════════════════════════════════════════
+
+PROBLEMAS COMUNS:
+═════════════════
+
+❌ Erro: "npm: comando não encontrado"
+└─ Solução: Instale Node.js em https://nodejs.org
+
+❌ Erro: "Port 5000 already in use"
+└─ Solução: Execute em outro terminal ou mude PORT em .env para 5001
+
+❌ Erro: "Cannot find module"
+└─ Solução: Rode setup.bat novamente ou execute: npm install
+
+❌ Banco de dados vazio após iniciar
+└─ Solução: Aguarde 5 segundos para database.db ser criado
+
+═════════════════════════════════════════════════════════════════════
+
+PRÓXIMAS FASES:
+════════════════
+
+✅ Backend está pronto!
+⏳ PRÓXIMO: Integrar MercadoPago para pagamentos
+⏳ PRÓXIMO: Conectar frontend ao backend
+
+═════════════════════════════════════════════════════════════════════
+
+Desenvolvido para GlowUp Store
+Backend v1.0 - Pronto para Usar
