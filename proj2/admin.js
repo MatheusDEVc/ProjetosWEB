@@ -1,21 +1,267 @@
 // Painel Administrativo - Gerenciamento de Pedidos
 
+let allOrders = [];
 let filteredOrders = [];
+let allProducts = [];
+let siteSettings = {};
 let currentSearch = '';
 let currentStatusFilter = '';
 let currentSort = 'newest';
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadAdminDashboard();
+const API_BASE = 'http://localhost:5000';
+
+function apiHeaders() {
+    return getAuthHeader();
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    if (!await requireAdmin('login.html')) return;
+    setupAdminTabs();
+    await loadAdminDashboard();
     setupFilterListeners();
+    setupSiteSettingsListeners();
+    setupProductListeners();
 });
 
-function loadAdminDashboard() {
-    const orders = getAllOrders();
+async function loadAdminDashboard() {
+    await Promise.all([loadAdminOrders(), loadSiteSettings(), loadAdminProducts()]);
+}
+
+async function loadAdminOrders() {
+    const orders = await fetchAdminOrders();
+    allOrders = orders;
     filteredOrders = [...orders];
-    
     displayStatistics(orders);
     renderOrders(filteredOrders);
+}
+
+async function loadSiteSettings() {
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/site-settings`, {
+            headers: apiHeaders()
+        });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || 'Erro ao carregar configurações');
+        siteSettings = body.data;
+        renderSiteSettings();
+    } catch (error) {
+        console.error('Erro ao carregar configurações do site:', error);
+        alert('Não foi possível carregar as configurações do site.');
+    }
+}
+
+function renderSiteSettings() {
+    document.getElementById('site-title').value = siteSettings.site_title || '';
+    document.getElementById('hero-title').value = siteSettings.hero_title || '';
+    document.getElementById('hero-subtitle').value = siteSettings.hero_subtitle || '';
+    document.getElementById('hero-button-primary').value = siteSettings.hero_button_primary || '';
+    document.getElementById('hero-button-secondary').value = siteSettings.hero_button_secondary || '';
+    document.getElementById('footer-about').value = siteSettings.footer_about || '';
+    document.getElementById('footer-email').value = siteSettings.footer_email || '';
+    document.getElementById('footer-phone').value = siteSettings.footer_phone || '';
+}
+
+function setupSiteSettingsListeners() {
+    const saveSiteBtn = document.getElementById('save-site-settings');
+    if (saveSiteBtn) {
+        saveSiteBtn.addEventListener('click', saveSiteSettings);
+    }
+}
+
+async function saveSiteSettings() {
+    try {
+        const payload = {
+            settings: {
+                site_title: document.getElementById('site-title').value,
+                hero_title: document.getElementById('hero-title').value,
+                hero_subtitle: document.getElementById('hero-subtitle').value,
+                hero_button_primary: document.getElementById('hero-button-primary').value,
+                hero_button_secondary: document.getElementById('hero-button-secondary').value,
+                footer_about: document.getElementById('footer-about').value,
+                footer_email: document.getElementById('footer-email').value,
+                footer_phone: document.getElementById('footer-phone').value
+            }
+        };
+
+        const response = await fetch(`${API_BASE}/api/admin/site-settings`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...apiHeaders()
+            },
+            body: JSON.stringify(payload)
+        });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || 'Erro ao salvar configurações');
+        siteSettings = body.data;
+        alert('Configurações do site atualizadas com sucesso!');
+    } catch (error) {
+        console.error('Erro ao salvar configurações do site:', error);
+        alert('Falha ao salvar as configurações do site: ' + error.message);
+    }
+}
+
+async function loadAdminProducts() {
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/products`, {
+            headers: apiHeaders()
+        });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || 'Erro ao carregar produtos');
+        allProducts = body.data;
+        renderProductTable();
+    } catch (error) {
+        console.error('Erro ao carregar produtos admin:', error);
+        alert('Não foi possível carregar os produtos do painel.');
+    }
+}
+
+function renderProductTable() {
+    const tbody = document.getElementById('admin-product-list');
+    if (!tbody) return;
+    if (!allProducts || !allProducts.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 16px; text-align:center;">Nenhum produto encontrado.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = allProducts.map(product => `
+        <tr>
+            <td>${product.name}</td>
+            <td>${product.category}</td>
+            <td>${product.gender}</td>
+            <td>R$ ${parseFloat(product.price).toFixed(2)}</td>
+            <td>${product.stock}</td>
+            <td>
+                <button class="btn-edit" onclick="openProductForm(${product.id})">Editar</button>
+                <button class="btn-delete" onclick="deleteProduct(${product.id})">Excluir</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function setupProductListeners() {
+    const newProductBtn = document.getElementById('new-product-btn');
+    const saveProductBtn = document.getElementById('save-product-btn');
+    const cancelProductBtn = document.getElementById('cancel-product-btn');
+
+    if (newProductBtn) {
+        newProductBtn.addEventListener('click', () => openProductForm());
+    }
+    if (saveProductBtn) {
+        saveProductBtn.addEventListener('click', submitProductForm);
+    }
+    if (cancelProductBtn) {
+        cancelProductBtn.addEventListener('click', closeProductForm);
+    }
+}
+
+function openProductForm(productId) {
+    const panel = document.getElementById('product-form-panel');
+    const title = document.getElementById('product-form-title');
+    const product = allProducts.find(item => item.id === productId) || null;
+
+    title.textContent = product ? 'Editar produto' : 'Novo produto';
+    panel.style.display = 'block';
+    panel.dataset.editId = product ? product.id : '';
+
+    document.getElementById('product-name').value = product?.name || '';
+    document.getElementById('product-category').value = product?.category || '';
+    document.getElementById('product-gender').value = product?.gender || 'Feminino';
+    document.getElementById('product-price').value = product?.price || '';
+    document.getElementById('product-stock').value = product?.stock || 0;
+    document.getElementById('product-image').value = product?.image_url || product?.image || '';
+    document.getElementById('product-description').value = product?.description || '';
+}
+
+function closeProductForm() {
+    const panel = document.getElementById('product-form-panel');
+    if (!panel) return;
+    panel.style.display = 'none';
+    panel.dataset.editId = '';
+}
+
+async function submitProductForm() {
+    try {
+        const panel = document.getElementById('product-form-panel');
+        const productId = panel?.dataset.editId;
+        const payload = {
+            name: document.getElementById('product-name').value,
+            category: document.getElementById('product-category').value,
+            gender: document.getElementById('product-gender').value,
+            price: parseFloat(document.getElementById('product-price').value) || 0,
+            stock: parseInt(document.getElementById('product-stock').value, 10) || 0,
+            image_url: document.getElementById('product-image').value,
+            description: document.getElementById('product-description').value
+        };
+
+        const url = `${API_BASE}/api/admin/products${productId ? `/${productId}` : ''}`;
+        const method = productId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                ...apiHeaders()
+            },
+            body: JSON.stringify(payload)
+        });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || 'Erro ao salvar produto');
+
+        await loadAdminProducts();
+        closeProductForm();
+        alert('Produto salvo com sucesso!');
+    } catch (error) {
+        console.error('Erro ao salvar produto:', error);
+        alert('Falha ao salvar produto: ' + error.message);
+    }
+}
+
+async function deleteProduct(productId) {
+    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/products/${productId}`, {
+            method: 'DELETE',
+            headers: apiHeaders()
+        });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || 'Erro ao excluir produto');
+        await loadAdminProducts();
+        alert('Produto removido com sucesso!');
+    } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        alert('Falha ao excluir produto: ' + error.message);
+    }
+}
+
+function setupAdminTabs() {
+    const tabs = document.querySelectorAll('.admin-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            switchAdminTab(tab.dataset.section);
+        });
+    });
+}
+
+function switchAdminTab(sectionId) {
+    document.querySelectorAll('.admin-section').forEach(section => {
+        section.classList.toggle('admin-section-active', section.id === `admin-section-${sectionId}`);
+    });
+}
+
+async function fetchAdminOrders() {
+    try {
+        const response = await fetchJson('/api/admin/orders', {
+            headers: getAuthHeader()
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar pedidos admin:', error);
+        alert('Não foi possível carregar os pedidos. Verifique se você está logado como admin.');
+        return [];
+    }
 }
 
 function displayStatistics(orders) {
@@ -68,7 +314,7 @@ function setupFilterListeners() {
 }
 
 function applyFilters() {
-    let orders = getAllOrders();
+    let orders = [...allOrders];
 
     // Aplicar filtro de busca
     if (currentSearch) {
@@ -139,6 +385,7 @@ function createOrderCard(order) {
         `;
     }).join('');
 
+    const addressText = order.customerData.address || 'Endereço não disponível';
     const statusButtonsHtml = Object.keys(ORDER_STATUSES).map(status => {
         const isActive = order.currentStatus === status;
         const statusLabel = ORDER_STATUSES[status].label;
@@ -194,8 +441,7 @@ function createOrderCard(order) {
                 </div>
                 <div class="customer-info">
                     <strong>📦 Entrega</strong>
-                    <span>${order.customerData.address}, ${order.customerData.number}</span>
-                    <span>${order.customerData.city}, ${order.customerData.state} ${order.customerData.zip}</span>
+                    <span>${addressText}</span>
                 </div>
                 <div class="customer-info">
                     <strong>💳 Pagamento</strong>
@@ -232,19 +478,16 @@ function createOrderCard(order) {
     `;
 }
 
-function updateOrderStatus(orderNumber, newStatus) {
-    const orders = getAllOrders();
-    const orderIndex = orders.findIndex(o => o.orderNumber === orderNumber);
+async function updateOrderStatus(orderNumber, newStatus) {
+    const orderIndex = allOrders.findIndex(o => o.orderNumber === orderNumber);
 
     if (orderIndex === -1) {
         alert('Pedido não encontrado!');
         return;
     }
 
-    const order = orders[orderIndex];
-    const statusInfo = ORDER_STATUSES[newStatus];
+    const order = allOrders[orderIndex];
 
-    // Mensagens personalizadas para cada status
     const statusMessages = {
         'confirmado': 'Seu pedido foi confirmado com sucesso!',
         'processando': 'Seu pedido está sendo processado pelo nosso sistema.',
@@ -254,18 +497,28 @@ function updateOrderStatus(orderNumber, newStatus) {
         'cancelado': 'Seu pedido foi cancelado.'
     };
 
-    // Atualizar status
-    order.currentStatus = newStatus;
-    order.addStatusUpdate(newStatus, statusMessages[newStatus]);
+    try {
+        await fetchJson(`/api/admin/orders/${order.id}/status`, {
+            method: 'PUT',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ status: newStatus })
+        });
 
-    // Salvar alterações
-    updateOrderInStorage(order);
+        order.currentStatus = newStatus;
+        order.statusHistory.push({
+            status: newStatus,
+            timestamp: new Date().toISOString(),
+            message: statusMessages[newStatus]
+        });
 
-    // Atualizar exibição
-    loadAdminDashboard();
+        applyFilters();
+    } catch (error) {
+        console.error('Erro ao atualizar status do pedido:', error);
+        alert('Falha ao atualizar status do pedido: ' + error.message);
+        return;
+    }
 
-    // Notificar
-    showNotification(`Status do pedido ${orderNumber} atualizado para ${statusInfo.label}!`, 'success');
+    await loadAdminDashboard();
 }
 
 function formatDate(date) {

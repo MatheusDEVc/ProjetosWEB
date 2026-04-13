@@ -81,6 +81,11 @@ async function initDB() {
         FOREIGN KEY(user_id) REFERENCES users(id)
     )`);
 
+    await db.exec(`CREATE TABLE IF NOT EXISTS site_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    )`);
+
     console.log('✅ Banco de dados inicializado');
 
     // Seed de produtos
@@ -101,6 +106,40 @@ async function initDB() {
             );
         }
         console.log('✅ Produtos inseridos');
+    }
+
+    const defaultSettings = [
+        { key: 'site_title', value: 'GlowUp Store - Produtos de Saúde e Beleza' },
+        { key: 'hero_title', value: 'Bem-vindo à GlowUp Store' },
+        { key: 'hero_subtitle', value: 'Sua fonte confiável para produtos de saúde e beleza premium' },
+        { key: 'hero_button_primary', value: 'Explorar Masculino' },
+        { key: 'hero_button_secondary', value: 'Explorar Feminino' },
+        { key: 'footer_about', value: 'GlowUp Store - Seu destino confiável para produtos de saúde e beleza de qualidade premium.' },
+        { key: 'footer_email', value: 'contato@glowupstore.com' },
+        { key: 'footer_phone', value: '(11) 99999-9999' }
+    ];
+
+    for (const setting of defaultSettings) {
+        const existing = await db.get('SELECT key FROM site_settings WHERE key = ?', [setting.key]);
+        if (!existing) {
+            await db.run('INSERT INTO site_settings (key, value) VALUES (?, ?)', [setting.key, setting.value]);
+        }
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@glowup.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
+    const adminFullName = process.env.ADMIN_FULL_NAME || 'Administrador GlowUp';
+    const adminPhone = process.env.ADMIN_PHONE || '11999999999';
+    const adminCpf = process.env.ADMIN_CPF || '00000000000';
+
+    const existingAdmin = await db.get('SELECT id FROM users WHERE email = ?', [adminEmail]);
+    if (!existingAdmin) {
+        const adminHash = await bcryptjs.hash(adminPassword, 10);
+        await db.run(
+            'INSERT INTO users (email, password_hash, full_name, phone, cpf, role) VALUES (?,?,?,?,?,?)',
+            [adminEmail, adminHash, adminFullName, adminPhone, adminCpf, 'admin']
+        );
+        console.log(`✅ Conta admin criada: ${adminEmail}`);
     }
 }
 
@@ -139,6 +178,15 @@ function normalizeOrder(order) {
             }
         ]
     };
+}
+
+async function getSiteSettings() {
+    const rows = await db.all('SELECT key, value FROM site_settings');
+    return rows.reduce((acc, row) => ({ ...acc, [row.key]: row.value }), {});
+}
+
+function isAdminUser(userId) {
+    return db.get('SELECT role FROM users WHERE id = ?', [userId]).then(user => user?.role === 'admin');
 }
 
 // ===== ROTAS =====
@@ -182,7 +230,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const {email, password} = req.body;
 
-        const user = await db.get('SELECT id, email, full_name, password_hash, phone, cpf FROM users WHERE email = ?', [email]);
+        const user = await db.get('SELECT id, email, full_name, password_hash, phone, cpf, role FROM users WHERE email = ?', [email]);
         if (!user) return res.status(401).json({success: false, message: 'Usuário não encontrado'});
 
         const validPassword = await bcryptjs.compare(password, user.password_hash);
@@ -190,7 +238,18 @@ app.post('/api/auth/login', async (req, res) => {
 
         const token = jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET || 'secret', {expiresIn: '7d'});
 
-        res.json({success: true, token, user: {id: user.id, email: user.email, full_name: user.full_name, phone: user.phone, cpf: user.cpf}});
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                phone: user.phone,
+                cpf: user.cpf,
+                role: user.role
+            }
+        });
 
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
@@ -206,7 +265,7 @@ app.get('/api/auth/me', async (req, res) => {
         const token = auth.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 
-        const user = await db.get('SELECT id, email, full_name, phone, cpf FROM users WHERE id = ?', [decoded.id]);
+        const user = await db.get('SELECT id, email, full_name, phone, cpf, role FROM users WHERE id = ?', [decoded.id]);
         if (!user) return res.status(404).json({success: false, message: 'Usuário não encontrado'});
 
         res.json({success: true, user});
@@ -219,7 +278,169 @@ app.get('/api/auth/me', async (req, res) => {
 app.get('/api/products', async (req, res) => {
     try {
         const products = await db.all('SELECT * FROM products WHERE stock > 0');
+        const mapped = products.map(product => ({
+            ...product,
+            image: product.image_url,
+            description: product.description || ''
+        }));
+        res.json({success: true, data: mapped});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const product = await db.get('SELECT * FROM products WHERE id = ?', [id]);
+        if (!product) return res.status(404).json({success: false, message: 'Produto não encontrado'});
+        return res.json({success: true, data: { ...product, image: product.image_url, description: product.description || '' }});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+// Admin: gerenciar produtos
+app.get('/api/admin/products', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const user = await db.get('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (user?.role !== 'admin') {
+            return res.status(403).json({success: false, message: 'Acesso negado'});
+        }
+
+        const products = await db.all('SELECT * FROM products ORDER BY created_at DESC');
         res.json({success: true, data: products});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.post('/api/admin/products', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const user = await db.get('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (user?.role !== 'admin') {
+            return res.status(403).json({success: false, message: 'Acesso negado'});
+        }
+
+        const {name, price, category, gender, stock, image_url, description} = req.body;
+        if (!name || !price || !category || !gender) {
+            return res.status(400).json({success: false, message: 'Campos obrigatórios faltando'});
+        }
+
+        const result = await db.run(
+            'INSERT INTO products (name, price, category, gender, stock, image_url, description) VALUES (?,?,?,?,?,?,?)',
+            [name, price, category, gender, stock || 0, image_url || '', description || '']
+        );
+        const product = await db.get('SELECT * FROM products WHERE id = ?', [result.lastID]);
+        res.json({success: true, data: product});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.put('/api/admin/products/:id', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const user = await db.get('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (user?.role !== 'admin') {
+            return res.status(403).json({success: false, message: 'Acesso negado'});
+        }
+
+        const {id} = req.params;
+        const {name, price, category, gender, stock, image_url, description} = req.body;
+
+        await db.run(
+            'UPDATE products SET name = ?, price = ?, category = ?, gender = ?, stock = ?, image_url = ?, description = ? WHERE id = ?',
+            [name, price, category, gender, stock || 0, image_url || '', description || '', id]
+        );
+
+        const product = await db.get('SELECT * FROM products WHERE id = ?', [id]);
+        res.json({success: true, data: product});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.delete('/api/admin/products/:id', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const user = await db.get('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (user?.role !== 'admin') {
+            return res.status(403).json({success: false, message: 'Acesso negado'});
+        }
+
+        const {id} = req.params;
+        await db.run('DELETE FROM products WHERE id = ?', [id]);
+        res.json({success: true, message: 'Produto removido com sucesso'});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.get('/api/site-settings', async (req, res) => {
+    try {
+        const settings = await getSiteSettings();
+        res.json({success: true, data: settings});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.get('/api/admin/site-settings', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const user = await db.get('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (user?.role !== 'admin') {
+            return res.status(403).json({success: false, message: 'Acesso negado'});
+        }
+
+        const settings = await getSiteSettings();
+        res.json({success: true, data: settings});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.put('/api/admin/site-settings', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const user = await db.get('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (user?.role !== 'admin') {
+            return res.status(403).json({success: false, message: 'Acesso negado'});
+        }
+
+        const settings = req.body.settings;
+        if (typeof settings !== 'object' || !settings) {
+            return res.status(400).json({success: false, message: 'Envie um objeto settings'});
+        }
+
+        for (const key of Object.keys(settings)) {
+            const value = settings[key] || '';
+            await db.run('INSERT INTO site_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value', [key, value]);
+        }
+
+        const updated = await getSiteSettings();
+        res.json({success: true, data: updated});
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
     }
@@ -320,8 +541,25 @@ app.get('/api/admin/orders', async (req, res) => {
             return res.status(403).json({success: false, message: 'Acesso negado'});
         }
 
-        const orders = await db.all('SELECT * FROM orders ORDER BY created_at DESC');
-        const parsedOrders = orders.map(normalizeOrder);
+        const orders = await db.all(
+            `SELECT orders.*, users.email AS customer_email, users.full_name AS customer_full_name, users.phone AS customer_phone, users.cpf AS customer_cpf
+             FROM orders
+             JOIN users ON users.id = orders.user_id
+             ORDER BY orders.created_at DESC`
+        );
+
+        const parsedOrders = orders.map(order => {
+            const normalized = normalizeOrder(order);
+            normalized.customerData = {
+                fullName: order.customer_full_name,
+                email: order.customer_email,
+                phone: order.customer_phone,
+                cpf: order.customer_cpf,
+                address: order.address
+            };
+            return normalized;
+        });
+
         res.json({success: true, data: parsedOrders});
 
     } catch (error) {

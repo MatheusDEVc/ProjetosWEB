@@ -133,16 +133,39 @@
     <script>
         let currentProduct = null;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        async function fetchProduct(productId) {
+            const response = await fetch(`${API_BASE}/api/products/${productId}`);
+            const body = await response.json().catch(() => null);
+            if (!response.ok) {
+                throw new Error(body?.message || 'Produto não encontrado');
+            }
+            return {
+                ...body.data,
+                image: body.data.image_url || body.data.image,
+                description: body.data.description || '',
+                fullDescription: body.data.full_description || body.data.description || '',
+                specs: Array.isArray(body.data.specs) ? body.data.specs : [],
+                benefits: Array.isArray(body.data.benefits) ? body.data.benefits : []
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = parseInt(urlParams.get('id'));
-            
-            currentProduct = PRODUCTS.find(p => p.id === productId);
-            if (currentProduct) {
+
+            if (!productId) {
+                document.querySelector('.product-detail').innerHTML = '<p>Produto não encontrado</p>';
+                return;
+            }
+
+            try {
+                currentProduct = await fetchProduct(productId);
+                await loadProducts();
                 loadProductDetail(currentProduct);
                 loadRelatedProducts(currentProduct);
-            } else {
-                document.querySelector('.product-detail').innerHTML = '<p>Produto não encontrado</p>';
+            } catch (error) {
+                console.error(error);
+                document.querySelector('.product-detail').innerHTML = `<p>${error.message}</p>`;
             }
 
             setupQuantityControls();

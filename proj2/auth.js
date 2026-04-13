@@ -40,6 +40,22 @@ function requireAuth(redirectPage = 'login.html') {
     return true;
 }
 
+async function requireAdmin(redirectPage = 'index.html') {
+    if (!requireAuth()) return false;
+    const user = await fetchProfile();
+    if (!user || user.role !== 'admin') {
+        alert('Acesso restrito ao administrador');
+        window.location.href = redirectPage;
+        return false;
+    }
+    return true;
+}
+
+function isAdmin() {
+    const user = getUser();
+    return user?.role === 'admin';
+}
+
 function updateAuthUI() {
     const authActions = document.getElementById('auth-actions');
     if (!authActions) return;
@@ -48,6 +64,7 @@ function updateAuthUI() {
     if (user) {
         authActions.innerHTML = `
             <span class="user-badge">Olá, ${user.full_name.split(' ')[0]}</span>
+            ${user.role === 'admin' ? '<a href="admin.html" class="btn btn-primary btn-small">Admin</a>' : ''}
             <button id="logout-btn" class="btn btn-secondary btn-small">Sair</button>
         `;
         const logoutBtn = document.getElementById('logout-btn');

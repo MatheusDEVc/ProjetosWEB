@@ -33,6 +33,173 @@
             opacity: 0.9;
         }
 
+        .admin-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #111827;
+            padding: 12px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 700;
+        }
+
+        .admin-tab.active,
+        .admin-tab:hover {
+            background: #d946a6;
+            color: white;
+            border-color: #d946a6;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section-active {
+            display: block;
+        }
+
+        .settings-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #d946a6;
+            box-shadow: 0 0 0 3px rgba(217, 70, 166, 0.14);
+        }
+
+        .product-table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .product-table th,
+        .product-table td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .product-table th {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .product-form-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+
+        .product-fullwidth {
+            grid-column: 1 / -1;
+        }
+
+        .settings-panel p {
+            color: #6b7280;
+            margin-top: 6px;
+            max-width: 760px;
+        }
+
+        .admin-section .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .settings-panel h2,
+        .product-form-panel h3 {
+            margin-top: 0;
+            color: #111827;
+        }
+
+        .settings-panel button {
+            margin-top: 20px;
+        }
+
+        .product-table button {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .product-table .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .product-table .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .product-table .btn-edit:hover,
+        .product-table .btn-delete:hover {
+            opacity: 0.95;
+        }
+
+        .product-table td {
+            vertical-align: middle;
+        }
+
+        .admin-section.orders-only {
+            padding-top: 0;
+        }
+
         .filters-section {
             background: white;
             padding: 20px;
@@ -417,14 +584,20 @@
             <!-- Admin Header -->
             <div class="admin-header">
                 <h1>👨‍💼 Painel Administrativo</h1>
-                <p>Gerencie os pedidos e atualize os status dos clientes</p>
+                <p>Gerencie pedidos, edite o site e atualize produtos diretamente do painel.</p>
             </div>
 
-            <!-- Statistics Section -->
-            <div class="stats-section" id="stats-section"></div>
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-section="orders">Pedidos</button>
+                <button class="admin-tab" data-section="site">Configurações do Site</button>
+                <button class="admin-tab" data-section="products">Produtos</button>
+            </div>
 
-            <!-- Filters Section -->
-            <div class="filters-section">
+            <section class="admin-section admin-section-active" id="admin-section-orders">
+                <div class="stats-section" id="stats-section"></div>
+
+                <!-- Filters Section -->
+                <div class="filters-section">
                 <div class="filter-group">
                     <label for="search-order">Buscar por Pedido/Email:</label>
                     <input type="text" id="search-order" placeholder="GU123ABC45 ou email@exemplo.com">
@@ -460,6 +633,114 @@
                     <p>Carregando pedidos...</p>
                 </div>
             </div>
+        </section>
+
+        <section class="admin-section" id="admin-section-site">
+            <div class="settings-panel">
+                <h2>Editar conteúdo do site</h2>
+                <p>Altere textos principais usados na home e no rodapé.</p>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="site-title">Título do site</label>
+                        <input type="text" id="site-title" placeholder="Título do navegador e site" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hero-title">Título do Hero</label>
+                        <input type="text" id="hero-title" placeholder="Bem-vindo à GlowUp Store" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hero-subtitle">Subtítulo do Hero</label>
+                        <textarea id="hero-subtitle" rows="3" placeholder="Texto secundário do banner"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="hero-button-primary">Texto do botão primário</label>
+                        <input type="text" id="hero-button-primary" placeholder="Explorar Masculino" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hero-button-secondary">Texto do botão secundário</label>
+                        <input type="text" id="hero-button-secondary" placeholder="Explorar Feminino" />
+                    </div>
+                    <div class="form-group">
+                        <label for="footer-about">Texto do rodapé</label>
+                        <textarea id="footer-about" rows="3" placeholder="Sobre a GlowUp Store"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="footer-email">Email de contato</label>
+                        <input type="text" id="footer-email" placeholder="contato@glowupstore.com" />
+                    </div>
+                    <div class="form-group">
+                        <label for="footer-phone">Telefone de contato</label>
+                        <input type="text" id="footer-phone" placeholder="(11) 99999-9999" />
+                    </div>
+                </div>
+                <button id="save-site-settings" class="btn-update">Salvar configurações</button>
+            </div>
+        </section>
+
+        <section class="admin-section" id="admin-section-products">
+            <div class="settings-panel">
+                <h2>Gerenciar produtos</h2>
+                <p>Adicione, edite ou remova produtos disponíveis no site.</p>
+                <button id="new-product-btn" class="btn-update">Novo produto</button>
+                <div class="product-table-wrapper">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Gênero</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-list">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="product-form-panel" id="product-form-panel" style="display:none;">
+                <h3 id="product-form-title">Novo produto</h3>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="product-name">Nome</label>
+                        <input type="text" id="product-name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">Categoria</label>
+                        <input type="text" id="product-category" />
+                    </div>
+                    <div class="form-group">
+                        <label for="product-gender">Gênero</label>
+                        <select id="product-gender">
+                            <option value="Feminino">Feminino</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Unissex">Unissex</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Preço</label>
+                        <input type="number" id="product-price" step="0.01" />
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock">Estoque</label>
+                        <input type="number" id="product-stock" />
+                    </div>
+                    <div class="form-group">
+                        <label for="product-image">URL da imagem</label>
+                        <input type="text" id="product-image" />
+                    </div>
+                    <div class="form-group product-fullwidth">
+                        <label for="product-description">Descrição</label>
+                        <textarea id="product-description" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="save-product-btn" class="btn-update">Salvar produto</button>
+                    <button id="cancel-product-btn" class="btn-cancel">Cancelar</button>
+                </div>
+            </div>
+        </section>
         </div>
     </main>
 
@@ -473,8 +754,8 @@
                 </div>
                 <div class="footer-section">
                     <h4>Contato</h4>
-                    <p>Email: contato@glowupstore.com</p>
-                    <p>Telefone: (11) 99999-9999</p>
+                    <p id="footer-email-display">Email: contato@glowupstore.com</p>
+                    <p id="footer-phone-display">Telefone: (11) 99999-9999</p>
                 </div>
                 <div class="footer-section">
                     <h4>Links Úteis</h4>
