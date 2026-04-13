@@ -66,7 +66,7 @@ const PRODUCTS = [
         name: 'Gel Limpador Peles Oleosas',
         category: 'skincare',
         gender: 'Masculino',
-        price: 38.00,
+        price: 37.99,
         image: 'https://darrow.com.br/wp-content/uploads/2024/07/08-4-scaled.jpg',
         description: 'Gel limpador específico para controlar oleosidade facial.',
         fullDescription: 'Gel especialmente formulado para homens com pele oleosa. Controla a produção de sebo e deixa a pele limpa por até 8 horas.',

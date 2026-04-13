@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bcryptjs from 'bcryptjs';
@@ -15,6 +16,18 @@ import jwt from 'jsonwebtoken';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config();
+
+async function loadStaticProductCatalog() {
+    const productsFile = path.join(__dirname, '..', 'products.js');
+    const content = await fs.readFile(productsFile, 'utf-8');
+    const match = content.match(/const\s+PRODUCTS\s*=\s*(\[[\s\S]*?\]);/m);
+
+    if (!match) {
+        throw new Error('Não foi possível ler o catálogo de produtos do arquivo products.js');
+    }
+
+    return new Function(`return ${match[1]}`)();
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -88,24 +101,28 @@ async function initDB() {
 
     console.log('✅ Banco de dados inicializado');
 
-    // Seed de produtos
-    const count = await db.get('SELECT COUNT(*) as count FROM products');
-    if (count.count === 0) {
-        const products = [
-            {id: 1, name: 'Sérum Facial Vitamina C', price: 89.90, category: 'skincare', gender: 'Feminino', stock: 50},
-            {id: 2, name: 'Creme Anti-Rugas Premium', price: 124.50, category: 'skincare', gender: 'Feminino', stock: 30},
-            {id: 3, name: 'Máscara Facial Hidratante', price: 45.00, category: 'skincare', gender: 'Feminino', stock: 100},
-            {id: 4, name: 'Base Líquida Cobertura Total', price: 67.50, category: 'maquiagem', gender: 'Feminino', stock: 70},
-            {id: 5, name: 'Whey Protein Chocolate', price: 89.90, category: 'suplementos', gender: 'Masculino', stock: 100}
-        ];
+    // Sincronizar catálogo completo com products.js
+    try {
+        const products = await loadStaticProductCatalog();
+        const synced = [];
 
         for (const product of products) {
+            const imageUrl = product.image || product.image_url || 'https://via.placeholder.com/300';
+            const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+            const stock = product.stock !== undefined ? parseInt(product.stock, 10) || 0 : 0;
+            const description = product.description || '';
+
             await db.run(
-                'INSERT INTO products (id, name, price, category, gender, stock, image_url) VALUES (?,?,?,?,?,?,?)',
-                [product.id, product.name, product.price, product.category, product.gender, product.stock, 'https://via.placeholder.com/300']
+                'INSERT INTO products (id, name, price, category, gender, stock, image_url, description) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name = excluded.name, price = excluded.price, category = excluded.category, gender = excluded.gender, stock = excluded.stock, image_url = excluded.image_url, description = excluded.description',
+                [product.id, product.name, price, product.category, product.gender, stock, imageUrl, description]
             );
+            synced.push(product.id);
         }
-        console.log('✅ Produtos inseridos');
+
+        console.log(`✅ ${synced.length} produtos sincronizados a partir do catálogo products.js`);
+    } catch (error) {
+        console.error('⚠️ Falha ao sincronizar catálogo completo de produtos:', error.message);
+        console.log('⚠️ O backend continuará com o catálogo atual do banco de dados.');
     }
 
     const defaultSettings = [
