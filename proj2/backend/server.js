@@ -602,7 +602,9 @@ app.put('/api/admin/orders/:id/status', async (req, res) => {
 async function start() {
     try {
         await initDB();
-        app.listen(PORT, () => {
+        const server = app.listen(PORT);
+
+        server.on('listening', () => {
             console.log(`
 ╔════════════════════════════════════════════════════╗
 ║      ✨ GLOWUP STORE BACKEND                       ║
@@ -622,6 +624,26 @@ async function start() {
 ║                                                    ║
 ╚════════════════════════════════════════════════════╝
             `);
+        });
+
+        server.on('error', async (error) => {
+            if (error.code === 'EADDRINUSE') {
+                const fallbackPort = process.env.PORT_FALLBACK || 5001;
+                console.error(`❌ Porta ${PORT} já está em uso. Tentando porta ${fallbackPort}...`);
+                try {
+                    await new Promise((resolve, reject) => {
+                        const fallbackServer = app.listen(fallbackPort, () => resolve(fallbackServer));
+                        fallbackServer.on('error', reject);
+                    });
+                    console.log(`✅ Servidor iniciado em http://localhost:${fallbackPort}`);
+                } catch (fallbackError) {
+                    console.error('❌ Não foi possível iniciar em nenhuma porta disponível:', fallbackError);
+                    process.exit(1);
+                }
+            } else {
+                console.error('❌ Erro no servidor:', error);
+                process.exit(1);
+            }
         });
     } catch (error) {
         console.error('❌ Erro ao iniciar:', error);

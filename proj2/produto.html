@@ -160,13 +160,24 @@
 
             try {
                 currentProduct = await fetchProduct(productId);
-                await loadProducts();
-                loadProductDetail(currentProduct);
-                loadRelatedProducts(currentProduct);
             } catch (error) {
-                console.error(error);
-                document.querySelector('.product-detail').innerHTML = `<p>${error.message}</p>`;
+                console.warn('Falha ao carregar produto do backend, usando fallback estático:', error.message);
+                currentProduct = PRODUCTS.find(p => p.id === productId);
             }
+
+            await loadProducts();
+
+            if (!currentProduct) {
+                currentProduct = PRODUCTS.find(p => p.id === productId);
+            }
+
+            if (!currentProduct) {
+                document.querySelector('.product-detail').innerHTML = '<p>Produto não encontrado</p>';
+                return;
+            }
+
+            loadProductDetail(currentProduct);
+            loadRelatedProducts(currentProduct);
 
             setupQuantityControls();
             setupAddToCart();

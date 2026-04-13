@@ -14,16 +14,39 @@ async function apiGet(path) {
 async function loadProducts() {
     try {
         const body = await apiGet('/api/products');
-        if (body.success && Array.isArray(body.data)) {
-            window.PRODUCTS = body.data.map(product => ({
-                ...product,
-                image: product.image_url || product.image,
-                description: product.description || '',
-                fullDescription: product.full_description || product.description || '',
-                specs: product.specs || [],
-                benefits: product.benefits || []
-            }));
+        if (!body.success || !Array.isArray(body.data)) {
+            console.warn('Resposta inválida do backend de produtos, mantendo catálogo local.');
+            return;
         }
+        if (body.data.length === 0) {
+            console.warn('Backend retornou 0 produtos, mantendo catálogo local.');
+            return;
+        }
+
+        const backendProducts = body.data.map(product => ({
+            ...product,
+            image: product.image_url || product.image,
+            description: product.description || '',
+            fullDescription: product.full_description || product.description || '',
+            specs: product.specs || [],
+            benefits: product.benefits || []
+        }));
+
+        const localProducts = Array.isArray(window.PRODUCTS) ? window.PRODUCTS : [];
+        const localProductsMap = new Map(localProducts.map(product => [product.id, product]));
+
+        const merged = backendProducts.map(product => {
+            const existing = localProductsMap.get(product.id);
+            return existing ? { ...existing, ...product } : product;
+        });
+
+        for (const localProduct of localProducts) {
+            if (!merged.some(product => product.id === localProduct.id)) {
+                merged.push(localProduct);
+            }
+        }
+
+        window.PRODUCTS = merged;
     } catch (error) {
         console.warn('Não foi possível carregar produtos do backend:', error.message);
     }
