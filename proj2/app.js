@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setupCategoryClickHandlers();
     updateActiveNavLink();
+    updateLogoNavigation();
     updateCartCount();
 
     setTimeout(() => {
@@ -40,6 +41,16 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ ScrollAnimations inicializado');
     }, 100);
 });
+
+function updateLogoNavigation() {
+    const logo = document.querySelector('.logo');
+    if (!logo) return;
+    logo.style.cursor = 'pointer';
+    logo.addEventListener('click', function() {
+        window.location.href = 'index.html';
+    });
+    console.log('🏠 Navegação do logo configurada para Home');
+}
 
 function setupScrollEffects() {
     // Inicializar scroll animations para elementos estáticos E dinâmicos

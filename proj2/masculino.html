@@ -97,11 +97,25 @@
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            loadMasculinoProducts('todas');
-            setupCategoryFilters();
+            const initialCategory = getInitialCategory();
+            setupCategoryFilters(initialCategory);
+            loadMasculinoProducts(initialCategory);
         });
 
-        function setupCategoryFilters() {
+        function normalizeCategory(category) {
+            return String(category || '').trim().toLowerCase();
+        }
+
+        function getInitialCategory() {
+            const selected = sessionStorage.getItem('selectedCategory');
+            if (!selected) return 'todas';
+            sessionStorage.removeItem('selectedCategory');
+            const normalized = normalizeCategory(selected);
+            const valid = ['todas', 'skincare', 'suplementos', 'maquiagem', 'perfumaria', 'ebooks', 'receitas'];
+            return valid.includes(normalized) ? normalized : 'todas';
+        }
+
+        function setupCategoryFilters(defaultCategory = 'todas') {
             const filterButtons = document.querySelectorAll('.filter-btn');
             filterButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -110,15 +124,23 @@
                     loadMasculinoProducts(this.dataset.category);
                 });
             });
+
+            filterButtons.forEach(btn => {
+                btn.classList.toggle('active', normalizeCategory(btn.dataset.category) === normalizeCategory(defaultCategory));
+            });
         }
 
         function loadMasculinoProducts(category) {
             const container = document.getElementById('masculino-products');
             const catalog = typeof PRODUCTS !== 'undefined' ? PRODUCTS : [];
-            let filtered = catalog.filter(p => p.gender === 'Masculino' || p.gender === 'Unissex');
+            const selectedCategory = normalizeCategory(category);
+            let filtered = catalog.filter(p => {
+                const gender = normalizeCategory(p.gender);
+                return gender === 'masculino' || gender === 'unissex';
+            });
             
-            if (category !== 'todas') {
-                filtered = filtered.filter(p => p.category === category);
+            if (selectedCategory !== 'todas') {
+                filtered = filtered.filter(p => normalizeCategory(p.category) === selectedCategory);
             }
 
             container.innerHTML = filtered.map((product, index) => `
