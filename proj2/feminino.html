@@ -96,8 +96,7 @@
     <script src="auth.js"></script>
     <script src="app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            await loadProducts();
+        document.addEventListener('DOMContentLoaded', function() {
             loadFemininoProducts('todas');
             setupCategoryFilters();
         });
@@ -115,7 +114,8 @@
 
         function loadFemininoProducts(category) {
             const container = document.getElementById('feminino-products');
-            let filtered = PRODUCTS.filter(p => p.gender === 'Feminino' || p.gender === 'Unissex');
+            const catalog = typeof PRODUCTS !== 'undefined' ? PRODUCTS : [];
+            let filtered = catalog.filter(p => p.gender === 'Feminino' || p.gender === 'Unissex');
             
             if (category !== 'todas') {
                 filtered = filtered.filter(p => p.category === category);
@@ -129,7 +129,7 @@
                     <div class="product-info">
                         <h3 class="product-name">${product.name}</h3>
                         <p class="product-category">${product.category}</p>
-                        <p class="product-description">${product.description.substring(0, 80)}...</p>
+                        <p class="product-description">${product.description ? product.description.substring(0, 80) : ''}...</p>
                         <div class="product-price">R$ ${product.price.toFixed(2)}</div>
                         <a href="produto.html?id=${product.id}" class="product-button">Ver Detalhes</a>
                     </div>

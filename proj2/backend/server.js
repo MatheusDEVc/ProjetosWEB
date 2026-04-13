@@ -599,51 +599,16 @@ app.put('/api/admin/orders/:id/status', async (req, res) => {
 });
 
 // ===== INICIAR SERVIDOR =====
-async function tryListen(port) {
-    return new Promise((resolve, reject) => {
-        const server = app.listen(port, () => resolve(server));
-        server.on('error', reject);
-    });
-}
-
 async function start() {
     try {
         await initDB();
-
-        const candidatePorts = [
-            Number(process.env.PORT) || 5000,
-            Number(process.env.PORT_FALLBACK) || 5001,
-            5002,
-            5003
-        ];
-
-        let server;
-        let startedPort;
-
-        for (const port of candidatePorts) {
-            try {
-                server = await tryListen(port);
-                startedPort = port;
-                break;
-            } catch (error) {
-                if (error.code === 'EADDRINUSE') {
-                    console.warn(`❌ Porta ${port} já está em uso. Tentando próxima porta...`);
-                    continue;
-                }
-                throw error;
-            }
-        }
-
-        if (!server || !startedPort) {
-            throw new Error('Não foi possível iniciar em nenhuma porta disponível. Verifique se há processos usando as portas 5000-5003.');
-        }
-
-        console.log(`
+        app.listen(PORT, () => {
+            console.log(`
 ╔════════════════════════════════════════════════════╗
 ║      ✨ GLOWUP STORE BACKEND                       ║
 ║                                                    ║
-║  🚀 Servidor: http://localhost:${startedPort}
-║  📊 Health: http://localhost:${startedPort}/api/health
+║  🚀 Servidor: http://localhost:${PORT}
+║  📊 Health: http://localhost:${PORT}/api/health
 ║                                                    ║
 ║  Endpoints:                                        ║
 ║  POST   /api/auth/register                         ║
@@ -656,7 +621,8 @@ async function start() {
 ║  PUT    /api/admin/orders/:id/status (admin)      ║
 ║                                                    ║
 ╚════════════════════════════════════════════════════╝
-        `);
+            `);
+        });
     } catch (error) {
         console.error('❌ Erro ao iniciar:', error);
         process.exit(1);

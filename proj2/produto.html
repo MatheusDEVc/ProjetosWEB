@@ -133,23 +133,7 @@
     <script>
         let currentProduct = null;
 
-        async function fetchProduct(productId) {
-            const response = await fetch(`${API_BASE}/api/products/${productId}`);
-            const body = await response.json().catch(() => null);
-            if (!response.ok) {
-                throw new Error(body?.message || 'Produto não encontrado');
-            }
-            return {
-                ...body.data,
-                image: body.data.image_url || body.data.image,
-                description: body.data.description || '',
-                fullDescription: body.data.full_description || body.data.description || '',
-                specs: Array.isArray(body.data.specs) ? body.data.specs : [],
-                benefits: Array.isArray(body.data.benefits) ? body.data.benefits : []
-            };
-        }
-
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = parseInt(urlParams.get('id'));
 
@@ -158,16 +142,7 @@
                 return;
             }
 
-            try {
-                currentProduct = await fetchProduct(productId);
-            } catch (error) {
-                console.warn('Falha ao carregar produto do backend, usando fallback estático:', error.message);
-                currentProduct = PRODUCTS.find(p => p.id === productId);
-            }
-
-            await loadProducts();
-
-            if (!currentProduct) {
+            if (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) {
                 currentProduct = PRODUCTS.find(p => p.id === productId);
             }
 
@@ -189,20 +164,19 @@
             document.getElementById('product-price').textContent = 'R$ ' + product.price.toFixed(2);
             document.getElementById('product-image').src = product.image;
             document.getElementById('product-image').alt = product.name;
-            document.getElementById('product-description').innerHTML = product.fullDescription || product.description;
+            document.getElementById('product-description').innerHTML = product.description || '';
             document.getElementById('breadcrumb-category').textContent = product.category;
 
             const specsList = document.getElementById('product-specs');
-            specsList.innerHTML = product.specs.map(spec => `<li>${spec}</li>`).join('');
+            specsList.innerHTML = Array.isArray(product.specs) ? product.specs.map(spec => `<li>${spec}</li>`).join('') : '';
 
             const benefitsList = document.getElementById('product-benefits');
-            benefitsList.innerHTML = product.benefits.map(benefit => `<li>${benefit}</li>`).join('');
+            benefitsList.innerHTML = Array.isArray(product.benefits) ? product.benefits.map(benefit => `<li>${benefit}</li>`).join('') : '';
         }
 
         function loadRelatedProducts(product) {
-            const related = PRODUCTS.filter(p => 
-                p.category === product.category && p.id !== product.id
-            ).slice(0, 4);
+            const catalog = typeof PRODUCTS !== 'undefined' ? PRODUCTS : [];
+            const related = catalog.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
             document.getElementById('related-products').innerHTML = related.map(prod => `
                 <div class="product-card">
