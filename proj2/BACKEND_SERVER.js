@@ -24,7 +24,7 @@ let db;
 // ===== MIDDLEWARE DE SEGURANÇA =====
 app.use(helmet());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN?.split(',') || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5500'],
     credentials: true
 }));
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
@@ -105,6 +105,43 @@ async function initDB() {
     }
 }
 
+function calculateEstimatedDelivery(createdAt) {
+    const date = createdAt ? new Date(createdAt) : new Date();
+    const daysToAdd = 7;
+    date.setDate(date.getDate() + daysToAdd);
+    return date.toISOString().split('T')[0];
+}
+
+function getStatusMessage(status) {
+    const messages = {
+        confirmado: 'Seu pedido foi confirmado com sucesso!',
+        processando: 'Seu pedido está sendo processado pelo nosso sistema.',
+        preparando: 'Estamos preparando seu pedido para envio.',
+        enviado: 'Seu pedido saiu para entrega! 🚚',
+        entregue: 'Seu pedido foi entregue com sucesso! Obrigado pela compra!',
+        cancelado: 'Seu pedido foi cancelado.'
+    };
+    return messages[status] || 'Status do pedido atualizado.';
+}
+
+function normalizeOrder(order) {
+    return {
+        ...order,
+        orderNumber: order.order_number,
+        currentStatus: order.status,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
+        createdAt: order.created_at || order.createdAt,
+        estimatedDelivery: calculateEstimatedDelivery(order.created_at || order.createdAt),
+        statusHistory: [
+            {
+                status: order.status,
+                timestamp: order.created_at || order.createdAt,
+                message: getStatusMessage(order.status)
+            }
+        ]
+    };
+}
+
 // ===== ROTAS =====
 
 // Health check
@@ -128,7 +165,7 @@ app.post('/api/auth/register', async (req, res) => {
             [email, password_hash, full_name, phone, cpf]
         );
 
-        const user = await db.get('SELECT id, email, full_name FROM users WHERE email = ?', [email]);
+        const user = await db.get('SELECT id, email, full_name, phone, cpf FROM users WHERE email = ?', [email]);
         const token = jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET || 'secret', {expiresIn: '7d'});
 
         res.json({success: true, token, user});
@@ -146,7 +183,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const {email, password} = req.body;
 
-        const user = await db.get('SELECT id, email, full_name, password_hash FROM users WHERE email = ?', [email]);
+        const user = await db.get('SELECT id, email, full_name, password_hash, phone, cpf FROM users WHERE email = ?', [email]);
         if (!user) return res.status(401).json({success: false, message: 'Usuário não encontrado'});
 
         const validPassword = await bcryptjs.compare(password, user.password_hash);
@@ -154,8 +191,26 @@ app.post('/api/auth/login', async (req, res) => {
 
         const token = jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET || 'secret', {expiresIn: '7d'});
 
-        res.json({success: true, token, user: {id: user.id, email: user.email, full_name: user.full_name}});
+        res.json({success: true, token, user: {id: user.id, email: user.email, full_name: user.full_name, phone: user.phone, cpf: user.cpf}});
 
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+// Perfil do usuário autenticado
+app.get('/api/auth/me', async (req, res) => {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return res.status(401).json({success: false, message: 'Não autenticado'});
+
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+
+        const user = await db.get('SELECT id, email, full_name, phone, cpf FROM users WHERE id = ?', [decoded.id]);
+        if (!user) return res.status(404).json({success: false, message: 'Usuário não encontrado'});
+
+        res.json({success: true, user});
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
     }
@@ -226,13 +281,7 @@ app.post('/api/orders', async (req, res) => {
 
         res.json({
             success: true,
-            order: {
-                id: order.id,
-                orderNumber: order.order_number,
-                status: order.status,
-                total: order.total,
-                createdAt: order.created_at
-            }
+            order: normalizeOrder(order)
         });
 
     } catch (error) {
@@ -250,7 +299,8 @@ app.get('/api/orders', async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 
         const orders = await db.all('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [decoded.id]);
-        res.json({success: true, data: orders});
+        const parsedOrders = orders.map(normalizeOrder);
+        res.json({success: true, data: parsedOrders});
 
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
@@ -272,7 +322,8 @@ app.get('/api/admin/orders', async (req, res) => {
         }
 
         const orders = await db.all('SELECT * FROM orders ORDER BY created_at DESC');
-        res.json({success: true, data: orders});
+        const parsedOrders = orders.map(normalizeOrder);
+        res.json({success: true, data: parsedOrders});
 
     } catch (error) {
         res.status(500).json({success: false, message: error.message});

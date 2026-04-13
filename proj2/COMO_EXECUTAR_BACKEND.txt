@@ -139,7 +139,7 @@ OPÇÃO C: Via Terminal/CMD
 ──────────────────────────
 1. Abra novo CMD
 2. Digite:
-   curl http://localhost:5000/api/health
+   curl http://localhost:5000/api/healt
 
 3. Você deve ver a resposta JSON
 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - GlowUp Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="dark-theme-cyan.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>✨ GlowUp Store</h1>
+                </div>
+                <nav class="nav-main">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="masculino.html" class="nav-link">Masculino</a>
+                    <a href="feminino.html" class="nav-link">Feminino</a>
+                    <a href="pedidos.html" class="nav-link">Meus Pedidos</a>
+                </nav>
+                <div class="header-actions">
+                    <div id="auth-actions" class="auth-actions"></div>
+                    <button id="cart-btn" class="cart-button">🛒 Carrinho <span id="cart-count" class="cart-badge">0</span></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content login-page">
+        <div class="container">
+            <section class="auth-section">
+                <div class="auth-card">
+                    <h2>Entrar</h2>
+                    <p>Faça login para acessar seu carrinho, histórico de compras e concluir pedidos com segurança.</p>
+                    <form id="login-form" class="auth-form">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" required>
+                        <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+                    </form>
+                    <p class="auth-footnote">Ainda não tem conta? <a href="register.html">Crie sua conta</a></p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 GlowUp Store. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('login-form');
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                if (!email || !password) {
+                    alert('Por favor, preencha o email e a senha.');
+                    return;
+                }
+
+                try {
+                    const response = await fetchJson('/api/auth/login', {
+                        method: 'POST',
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    setAuth(response.token, response.user);
+                    window.location.href = 'pedidos.html';
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

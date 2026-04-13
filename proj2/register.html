@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - GlowUp Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="dark-theme-cyan.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>✨ GlowUp Store</h1>
+                </div>
+                <nav class="nav-main">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="masculino.html" class="nav-link">Masculino</a>
+                    <a href="feminino.html" class="nav-link">Feminino</a>
+                    <a href="pedidos.html" class="nav-link">Meus Pedidos</a>
+                </nav>
+                <div class="header-actions">
+                    <div id="auth-actions" class="auth-actions"></div>
+                    <button id="cart-btn" class="cart-button">🛒 Carrinho <span id="cart-count" class="cart-badge">0</span></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content login-page">
+        <div class="container">
+            <section class="auth-section">
+                <div class="auth-card">
+                    <h2>Criar Conta</h2>
+                    <p>Cadastre-se para salvar pedidos, acompanhar histórico e comprar com segurança.</p>
+                    <form id="register-form" class="auth-form">
+                        <label for="full_name">Nome Completo</label>
+                        <input type="text" id="full_name" name="full_name" required>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                        <label for="phone">Telefone</label>
+                        <input type="tel" id="phone" name="phone" required>
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" name="cpf" required>
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" required>
+                        <button type="submit" class="btn btn-primary btn-full">Criar Conta</button>
+                    </form>
+                    <p class="auth-footnote">Já tem conta? <a href="login.html">Entrar</a></p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 GlowUp Store. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('register-form');
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const full_name = document.getElementById('full_name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const cpf = document.getElementById('cpf').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                if (!full_name || !email || !phone || !cpf || !password) {
+                    alert('Por favor, preencha todos os campos.');
+                    return;
+                }
+
+                try {
+                    const response = await fetchJson('/api/auth/register', {
+                        method: 'POST',
+                        body: JSON.stringify({ full_name, email, phone, cpf, password })
+                    });
+
+                    setAuth(response.token, response.user);
+                    window.location.href = 'pedidos.html';
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

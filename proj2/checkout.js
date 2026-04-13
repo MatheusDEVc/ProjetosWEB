@@ -1,9 +1,11 @@
 // Lógica de Checkout e Pagamento
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     if (document.getElementById('checkout-form')) {
+        if (!requireAuth('login.html')) return;
         setupCheckout();
         loadOrderSummary();
+        prefillCheckoutFields();
     }
 });
 
@@ -79,12 +81,10 @@ function handleCheckoutSubmit(e) {
     e.preventDefault();
 
     try {
-        // Validações básicas
         if (!validateForm()) {
             return;
         }
 
-        // Simular processamento de pagamento
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
         processPayment(paymentMethod);
     } catch (error) {
@@ -120,19 +120,14 @@ function validateEmail(email) {
 }
 
 function processPayment(method) {
-    // Mostrar loading
     const submitBtn = document.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Processando pagamento...';
 
-    console.log('Iniciando processamento de pagamento:', method);
-
-    // Simular processamento de 2 segundos
-    setTimeout(() => {
+    setTimeout(async () => {
         try {
-            console.log('Completando pedido após simulação...');
-            completeOrder();
+            await completeOrder();
         } catch (error) {
             console.error('Erro no processamento de pagamento:', error);
             alert('Houve um erro no processamento. Tente novamente.\n\nDetalhes: ' + error.message);
@@ -142,26 +137,20 @@ function processPayment(method) {
     }, 2000);
 }
 
-function completeOrder() {
+async function completeOrder() {
     try {
-        console.log('Iniciando completeOrder...');
-        
-        // Gerar número de pedido único
-        const orderNumber = 'GU' + Date.now().toString().slice(-8).toUpperCase();
+        if (!requireAuth('login.html')) {
+            return;
+        }
+
         const orderTotal = document.getElementById('summary-total').textContent;
-        
-        console.log('Número do pedido:', orderNumber);
-        console.log('Total do pedido:', orderTotal);
-        
-        // Extrair valor numérico do total
         const totalValue = parseFloat(orderTotal.replace('R$ ', '').replace(',', '.'));
-        console.log('Valor total (número):', totalValue);
-
-        // Obter dados do carrinho
         const cart = getCart();
-        console.log('Carrinho:', cart);
 
-        // Obter dados do formulário
+        if (!cart.length) {
+            throw new Error('Carrinho vazio. Adicione produtos antes de finalizar.');
+        }
+
         const customerData = {
             fullName: document.getElementById('full-name').value,
             email: document.getElementById('email').value,
@@ -174,51 +163,44 @@ function completeOrder() {
             state: document.getElementById('state').value || '',
             zip: document.getElementById('zip').value || ''
         };
-        console.log('Dados do cliente:', customerData);
 
-        // Obter método de pagamento
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-        console.log('Método de pagamento:', paymentMethod);
+        const items = cart.map(item => {
+            const product = PRODUCTS.find(p => p.id === item.id);
+            return {
+                id: item.id,
+                quantity: item.quantity,
+                price: product ? product.price : 0
+            };
+        });
 
-        // Salvar pedido
-        if (typeof saveOrder === 'function') {
-            console.log('Salvando pedido...');
-            saveOrder(orderNumber, cart, totalValue, customerData, paymentMethod);
-            console.log('Pedido salvo com sucesso!');
-        } else {
-            console.error('Função saveOrder não encontrada');
-            throw new Error('Sistema de pedidos indisponível');
-        }
+        const backendOrder = await submitOrderToBackend({
+            items,
+            total: totalValue,
+            paymentMethod,
+            address: formatCheckoutAddress(customerData),
+            orderHash: generateOrderHash()
+        });
 
-        // Limpar carrinho
         localStorage.removeItem('glowupCart');
         sessionStorage.removeItem('discount');
-        console.log('Carrinho limpo');
 
-        // Mostrar mensagem de sucesso
         const checkoutContainer = document.querySelector('.checkout-container');
         if (checkoutContainer) {
             checkoutContainer.style.display = 'none';
-            console.log('Container de checkout ocultado');
         }
-        
+
         const successMessage = document.getElementById('success-message');
         if (successMessage) {
             successMessage.style.display = 'block';
-            document.getElementById('order-number').textContent = orderNumber;
+            document.getElementById('order-number').textContent = backendOrder.orderNumber || 'N/A';
             document.getElementById('order-total').textContent = orderTotal;
-            console.log('Mensagem de sucesso exibida');
         }
 
-        // Scroll para o topo da página
         window.scrollTo(0, 0);
-        console.log('Página rolada para o topo');
-
     } catch (error) {
         console.error('Erro ao processar pedido:', error);
-        alert('Erro ao processar pedido. Por favor, tente novamente.\n\nDetalhes: ' + error.message);
-        
-        // Restaurar botão de submit
+        alert('Erro ao processar pedido. Por favor, tente novamente.\n\n' + error.message);
         const submitBtn = document.querySelector('button[type="submit"]');
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -226,3 +208,32 @@ function completeOrder() {
         }
     }
 }
+
+async function submitOrderToBackend(orderPayload) {
+    const response = await fetchJson('/api/orders', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify(orderPayload)
+    });
+    return response.order;
+}
+
+function formatCheckoutAddress(data) {
+    return `${data.address}, ${data.number}${data.complement ? ' - ' + data.complement : ''}, ${data.city} - ${data.state}, ${data.zip}`;
+}
+
+function prefillCheckoutFields() {
+    const user = getUser();
+    if (!user) return;
+
+    const fullName = document.getElementById('full-name');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+    const cpf = document.getElementById('cpf');
+
+    if (fullName && user.full_name) fullName.value = user.full_name;
+    if (email && user.email) email.value = user.email;
+    if (phone && user.phone) phone.value = user.phone;
+    if (cpf && user.cpf) cpf.value = user.cpf;
+}
+
