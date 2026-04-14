@@ -401,38 +401,95 @@ body {
 
 .category-filters {
     margin-bottom: 40px;
-    padding: 30px;
-    background-color: var(--light-color);
-    border-radius: 12px;
+    padding: 32px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.99) 0%, rgba(242,244,248,0.95) 100%);
+    border: 1px solid rgba(226,232,240,0.9);
+    border-radius: 24px;
+    box-shadow: 0 24px 40px rgba(15, 23, 42, 0.05);
 }
 
-.category-filters h3 {
-    margin-bottom: 20px;
-    color: var(--dark-color);
-}
-
-.filter-buttons {
+.filters-header {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
     flex-wrap: wrap;
+    margin-bottom: 24px;
 }
 
-.filter-btn {
-    padding: 10px 20px;
-    border: 2px solid var(--border-color);
+.filters-header h3 {
+    margin-bottom: 10px;
+    color: var(--dark-color);
+    font-size: 24px;
+}
+
+.tab-intro {
+    color: #475569;
+    max-width: 620px;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.tab-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
     background-color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-weight: 500;
+    border-radius: 999px;
+    border: 1px solid rgba(226,232,240,0.9);
+    font-size: 14px;
     color: var(--text-color);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
 }
 
-.filter-btn:hover,
-.filter-btn.active {
-    background-color: var(--primary-color);
+.tab-summary strong {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 6px;
+    background-color: rgba(226,232,240,0.7);
+    border-radius: 999px;
+    border: 1px solid rgba(226,232,240,0.9);
+}
+
+.tab-btn {
+    padding: 12px 22px;
+    border: none;
+    background-color: transparent;
+    color: #475569;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.25s ease, color 0.25s ease, background-color 0.25s ease;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    transform: translateY(-1px);
+    color: var(--primary-color);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
-    border-color: var(--primary-color);
+    box-shadow: 0 16px 30px rgba(217, 70, 166, 0.18);
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 18px;
+    background-color: rgba(248, 250, 252, 0.9);
+    border: 1px dashed rgba(148, 163, 184, 0.6);
+    border-radius: 16px;
 }
 
 /* ============================================

@@ -178,11 +178,11 @@
         font-size: 14px;
     }
 
-    .filter-buttons {
+    .category-tabs {
         gap: 8px;
     }
 
-    .filter-btn {
+    .tab-btn {
         padding: 8px 12px;
         font-size: 11px;
     }

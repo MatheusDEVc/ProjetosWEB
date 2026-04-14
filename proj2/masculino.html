@@ -44,16 +44,14 @@
     <main class="main-content">
         <div class="container">
             <div class="category-filters">
-                <h3>Filtrar por Categoria:</h3>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-category="todas">Todas</button>
-                    <button class="filter-btn" data-category="skincare">Skincare</button>
-                    <button class="filter-btn" data-category="suplementos">Suplementos</button>
-                    <button class="filter-btn" data-category="maquiagem">Maquiagem</button>
-                    <button class="filter-btn" data-category="perfumaria">Perfumaria</button>
-                    <button class="filter-btn" data-category="ebooks">eBooks</button>
-                    <button class="filter-btn" data-category="receitas">Receitas</button>
+                <div class="filters-header">
+                    <div>
+                        <h3>Explorar por categoria</h3>
+                        <p class="tab-intro">Use as abas abaixo para navegar por cada grupo de produtos disponíveis.</p>
+                    </div>
+                    <div class="tab-summary" aria-live="polite">Mostrando todos os produtos</div>
                 </div>
+                <div class="category-tabs" role="tablist"></div>
             </div>
 
             <div id="masculino-products" class="products-grid">
@@ -96,9 +94,19 @@
     <script src="auth.js"></script>
     <script src="app.js"></script>
     <script>
+        const CATEGORY_LABELS = {
+            todas: 'Todas',
+            skincare: 'Skincare',
+            suplementos: 'Suplementos',
+            maquiagem: 'Maquiagem',
+            perfumaria: 'Perfumaria',
+            ebooks: 'eBooks',
+            receitas: 'Receitas'
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             const initialCategory = getInitialCategory();
-            setupCategoryFilters(initialCategory);
+            renderCategoryTabs(getAvailableCategories(['masculino', 'unissex']), initialCategory);
             loadMasculinoProducts(initialCategory);
         });
 
@@ -115,32 +123,76 @@
             return valid.includes(normalized) ? normalized : 'todas';
         }
 
-        function setupCategoryFilters(defaultCategory = 'todas') {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(btn => {
+        function getAvailableCategories(genders) {
+            const catalog = typeof PRODUCTS !== 'undefined' ? PRODUCTS : [];
+            const categories = new Set(['todas']);
+            catalog.forEach(product => {
+                const gender = normalizeCategory(product.gender);
+                const category = normalizeCategory(product.category);
+                if (genders.includes(gender) && category) {
+                    categories.add(category);
+                }
+            });
+            return Array.from(categories).sort((a, b) => (a === 'todas' ? -1 : b === 'todas' ? 1 : a.localeCompare(b)));
+        }
+
+        function renderCategoryTabs(categories, activeCategory = 'todas') {
+            const wrapper = document.querySelector('.category-tabs');
+            if (!wrapper) return;
+            wrapper.innerHTML = categories.map(category => {
+                const label = CATEGORY_LABELS[category] || capitalize(category);
+                const isActive = normalizeCategory(category) === normalizeCategory(activeCategory);
+                const activeClass = isActive ? 'active' : '';
+                const ariaSelected = isActive ? 'true' : 'false';
+                return `<button type="button" role="tab" aria-selected="${ariaSelected}" class="tab-btn ${activeClass}" data-category="${category}">${label}</button>`;
+            }).join('');
+            attachTabListeners();
+        }
+
+        function attachTabListeners() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
-                    filterButtons.forEach(b => b.classList.remove('active'));
+                    tabButtons.forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-selected', 'false');
+                    });
                     this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
                     loadMasculinoProducts(this.dataset.category);
                 });
             });
+        }
 
-            filterButtons.forEach(btn => {
-                btn.classList.toggle('active', normalizeCategory(btn.dataset.category) === normalizeCategory(defaultCategory));
-            });
+        function updateFilterSummary(category, count) {
+            const summary = document.querySelector('.tab-summary');
+            if (!summary) return;
+            const label = normalizeCategory(category) === 'todas' ? 'Todos os produtos' : (CATEGORY_LABELS[normalizeCategory(category)] || capitalize(category));
+            summary.innerHTML = `<strong>${count}</strong> produto${count === 1 ? '' : 's'} • ${label}`;
+        }
+
+        function capitalize(text) {
+            return String(text || '').trim().replace(/(^|\s)\S/g, char => char.toUpperCase());
         }
 
         function loadMasculinoProducts(category) {
             const container = document.getElementById('masculino-products');
             const catalog = typeof PRODUCTS !== 'undefined' ? PRODUCTS : [];
             const selectedCategory = normalizeCategory(category);
-            let filtered = catalog.filter(p => {
-                const gender = normalizeCategory(p.gender);
+            let filtered = catalog.filter(product => {
+                const gender = normalizeCategory(product.gender);
                 return gender === 'masculino' || gender === 'unissex';
             });
-            
+
             if (selectedCategory !== 'todas') {
-                filtered = filtered.filter(p => normalizeCategory(p.category) === selectedCategory);
+                filtered = filtered.filter(product => normalizeCategory(product.category) === selectedCategory);
+            }
+
+            updateFilterSummary(selectedCategory, filtered.length);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-results">Nenhum produto encontrado para a categoria selecionada.</div>';
+                return;
             }
 
             container.innerHTML = filtered.map((product, index) => `
